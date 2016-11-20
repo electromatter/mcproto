@@ -1,6 +1,7 @@
 better NBT parsing
 better metaclasses
 better fixed point
+zero deps
 tests
 readme
 easy_install packaging
