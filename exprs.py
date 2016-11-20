@@ -7,6 +7,7 @@ Spaces are ignored
 Types:
 v - Varint (32-bit signed)
 V - Varlong (64-bit signed)
+? - Bool (Byte that is either 1 or 0)
 b, B - Byte, Unsigned Byte
 h, H - Short, Unsigned Short
 i, I - Int, Unsigned Int
