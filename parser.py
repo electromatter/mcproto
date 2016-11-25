@@ -5,6 +5,47 @@ import re
 
 __all__ = ['Array', 'Constant', 'Field', 'Branch', 'Fork', 'Parser', 'parse']
 
+"""
+
+Grammar:
+
+<string>		:= see python grammar
+<number>		:= r'(-|+|)(0b[01]+|0o[0-7]+|0x[0-9a-fA-F]+|[0-9]+)'
+<positive>		:= r'[1-9][0-9]*'
+
+<value>			:= <string>
+			 | <number>
+
+<string type>		:= r's'
+<integer type>		:= r'?|v|V|b|B|h|H|i|I|l|L'
+<compound type>		:= r'f|d|N|M|S|p|a|u|U'
+
+<array length>		:= <integer type>
+			 | '*'
+			 | <positive>
+
+<array>			:= 'A' <array length> <field>
+
+<type>			:= <string type>
+			 | <integer type>
+			 | <compound type>
+
+<branch>		:= <value> <fields>
+			 | <fields>
+
+<branches>		:= <branch> '|' <branch>
+			 | <branch>
+
+<field>			:= '(' <fields> ')'
+			 | <array>
+			 | <type> '(' <branches> ')'
+			 | <type> <value>
+			 | <type>
+
+<fields>		:= <field> <fields>
+			 | <field>
+"""
+
 INTEGER_TYPES = 'vVbBhHiIlL?'
 STRING_TYPES = 's'
 
