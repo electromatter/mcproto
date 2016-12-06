@@ -1,0 +1,75 @@
+handshake_start {
+	id : varint; id=0x00;
+	version : varint;
+	address : string;
+	port : ushort;
+	target : varint;
+};
+
+status_sb {
+	id : varint;
+
+	request {
+		id=0x00;
+	};
+
+	status_ping {
+		id=0x01;
+		timestamp : long;
+	};
+};
+
+status_cb {
+	id : varint;
+
+	status_response {
+		id=0x00
+		status : string;
+	};
+
+	status_pong {
+		id = 0x01;
+		timestamp : long;
+	};
+};
+
+login_sb {
+	id : varint;
+
+	login_start {
+		 id=0x00;
+		username : string;
+	};
+
+	login_response {
+		id=0x01;
+		secret, token : bytes;
+	};
+};
+
+login_cb {
+	id : varint;
+
+	login_kick {
+		id=0x00;
+		reason : string;
+	};
+
+	login_request {
+		id=0x01;
+		server_id : string;
+		pubkey, token : bytes;
+	};
+
+	login_success {
+		id=0x02;
+		uuid : uuid_string;
+		username : string;
+	};
+
+	login_compression {
+		id=0x02;
+		threshold : varint;
+	};
+};
+
