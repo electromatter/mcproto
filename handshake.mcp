@@ -28,7 +28,7 @@ status_cb {
 	};
 
 	status_pong {
-		id = 0x01;
+		id=0x01;
 		timestamp : long;
 	};
 };
