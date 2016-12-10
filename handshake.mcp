@@ -1,6 +1,8 @@
 handshake_sb {
+	id : varint;
+
 	start {
-		id : varint; id=0x00;
+		id=0x00;
 		version : varint;
 		address : string;
 		port : ushort;
