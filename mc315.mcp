@@ -1,96 +1,131 @@
+#packets that require special attention: map, open window, player list item, tab complete
+
 play315_sb {
 	id : varint
 
-	teleport {
-		id=0x00;
-		teleport_id : varint;
-	};
-
-	tab {
-		id=0x01;
-		command : bool;
-		at : bool_optional position;
-	};
-
-	message {
-		id=0x02;
-		message : string;
-	};
-
-	status {
-		id=0x03;
-		status : varint;
-	};
-
-	settings {
-		id=0x04;
-		locale : string;
-		view_distance : byte;
-		chat_mode : varint;
-		chat_colors : bool;
-		skin_parts : ubyte;
-		main_hand : varint;
-	};
-
-	transaction {
-		id=0x05;
-		window : byte;
-		action : short;
-		accepted : bool;
-	};
-
-	enchant_item {
-		id=0x06;
-		window, item : byte;	
-	};
-
-	click_window {
-		id=0x07;
-		window : byte;
-		slot : short;
-		button : byte;
-		action : short;
-		mode : varint;
-		item : slot;
-	};
-
-	close_window {
-		id=0x08;
-		window : byte;
-	};
-
-	plugin_message {
-		id=0x09;
-		channel : string;
-		message : bytes_eof;
-	};
-
-	use_entity {
-		id=0x0a;
-		target, type : varint;
-
-		interact {
-			type=0x00;
-			hand : varint;
+	client {
+		status {
+			id=0x03;
+			status : varint;
 		};
 
-		attack {
-			type=0x01;
+		settings {
+			id=0x04;
+			locale : string;
+			view_distance : byte;
+			chat_mode : varint;
+			chat_colors : bool;
+			skin_parts : ubyte;
+			main_hand : varint;
 		};
 
-		interact_at {
-			type=0x02;
-			x, y, z : float;
-			hand : varint;
+		plugin_message {
+			id=0x09;
+			channel : string;
+			message : bytes_eof;
+		};
+
+		keep_alive {
+			id=0x0b;
+			timestamp : varint;
 		};
 	};
 
-	keep_alive {
-		id=0x0b;
-		timestamp : varint;
+	gui {
+		tab {
+			id=0x01;
+			command : bool;
+			at : bool_optional position;
+		};
+
+		message {
+			id=0x02;
+			message : string;
+		};
+
+		window {
+			transaction {
+				id=0x05;
+				window : byte;
+				action : short;
+				accepted : bool;
+			};
+
+			enchant_item {
+				id=0x06;
+				window, item : byte;	
+			};
+
+			click {
+				id=0x07;
+				window : byte;
+				slot : short;
+				button : byte;
+				action : short;
+				mode : varint;
+				item : slot;
+			};
+
+			close {
+				id=0x08;
+				window : byte;
+			};
+		};
+
+		resource_status {
+			id=0x16;
+			status : varint;
+		};
+
+		held_item {
+			id=0x17;
+			slot : short;
+		};
+
+		creative_item {
+			id=0x18;
+			slot : short;
+			item : slot;
+		};
+
+		update_sign {
+			id=0x19;
+			at : position;
+			lines : array 4 string;
+		};
+
+		spectate {
+			id=0x1b;
+			target : uuid;
+		};
 	};
 
 	player {
+		teleport {
+			id=0x00;
+			teleport_id : varint;
+		};
+
+		use_entity {
+			id=0x0a;
+			target, type : varint;
+
+			interact {
+				type=0x00;
+				hand : varint;
+			};
+
+			attack {
+				type=0x01;
+			};
+
+			interact_at {
+				type=0x02;
+				x, y, z : float;
+				hand : varint;
+			};
+		};
+
 		position {
 			id=0x0c;
 			x, y, z : double;
@@ -115,677 +150,710 @@ play315_sb {
 			on_ground : bool;
 		};
 
-		vehicle {
+		vehicle_move {
 			id=0x10;
 			x, y, z : double;
 			yaw, pitch : float;
 		};
-	};
 
-	steer_boat {
-		id=0x11;
-		right, left : bool;
-	};
+		steer_boat {
+			id=0x11;
+			right, left : bool;
+		};
 
-	abilities {
-		id=0x12;
-		flags : byte;
-		fly, walk : float;
-	};
+		abilities {
+			id=0x12;
+			flags : byte;
+			fly, walk : float;
+		};
 
-	digging {
-		id=0x13;
-		status : varint;
-		at : position;
-		face = byte;
-	};
+		digging {
+			id=0x13;
+			status : varint;
+			at : position;
+			face = byte;
+		};
 
-	action {
-		id=0x14;
-		entity, action, jump_boost : varint;
-	};
+		action {
+			id=0x14;
+			entity, action, jump_boost : varint;
+		};
 
-	steer {
-		id=0x15;
-		left, forward : float;
-		flags : ubyte;
-	};
+		steer {
+			id=0x15;
+			left, forward : float;
+			flags : ubyte;
+		};
 
-	resource_status {
-		id=0x16;
-		status : varint;
-	};
+		animate {
+			id=0x1a;
+			hand : varint;
+		};
 
-	held_item {
-		id=0x17;
-		slot : short;
-	};
+		place_block {
+			id=0x1c;
+			at : position;
+			face, hand : varint;
+			x, y, z : float;
+		};
 
-	creative_item {
-		id=0x18;
-		slot : short;
-		item : slot;
-	};
-
-	update_sign {
-		id=0x19;
-		at : position;
-		lines : array 4 string;
-	};
-
-	animate {
-		id=0x1a;
-		hand : varint;
-	};
-
-	spectate {
-		id=0x1b;
-		target : uuid;
-	};
-
-	place_block {
-		id=0x1c;
-		at : position;
-		face, hand : varint;
-		x, y, z : float;
-	};
-
-	use_item {
-		id=0x1d;
-		hand : varint;
+		use_item {
+			id=0x1d;
+			hand : varint;
+		};
 	};
 };
 
 play315_cb {
 	id : varint
 
-	spawn_object {
-		id=0x00;
-		entity : varint;
-		uuid : uuid;
-		type : byte;
-		x, y, z : double;
-		pitch, yaw : angle;
-		data : int;
-		vx, vy, vz : short;
-	};
-
-	spawn_orb {
-		id=0x01;
-		entity : varint;
-		x, y, z : double;
-		size : short;
-	};
-
-	spawn_global {
-		id=0x02;
-		entity : varint;
-		type : byte;
-		x, y, z : double;
-	};
-
-	spawn_mob {
-		id=0x03;
-		entity : varint;
-		uuid : uuid;
-		type : byte;
-		x, y, z : double;
-		yaw, pitch, head_pitch : angle;
-		v_x, v_y, v_z : short;
-		metadata : metadata;
-	};
-
-	spawn_painting {
-		id=0x04;
-		entity : varint;
-		uuid : uuid;
-		title : string;
-		at : position;
-		direction : byte
-	};
-
-	spawn_player {
-		id=0x05;
-		entity : varint;
-		uuid : uuid;
-		x, y, z : double;
-		yaw, pitch : angle;
-		metadata : metadata;
-	};
-
-	animate {
-		id=0x06;
-		entity : varint;
-		action : ubyte;
-	};
-
-	stats {
-		id=0x07;
-		data : array varint {
-			name : string;
-			value : varint;
-		};
-	};
-
-	block_break {
-		id=0x08;
-		at : position;
-		stage : byte;
-	};
-
-	update_tile {
-		id=0x09;
-		at : position;
-		tile : nbt;
-	};
-
-	block_action {
-		id=0x0a;
-		action, param : ubyte;
-		block : varint;
-	};
-
-	update_block {
-		id=0x0b;
-		at : position;
-		block : varint;
-	};
-
-	boss_bar {
-		id=0x0c;
-		uuid : uuid;
-		action : varint;
-
-		create {
-			action=0;
-			title : string;
-			health : float;
-			color, divisions : varint;
-			flags : ubyte;
+	player {
+		stats {
+			id=0x07;
+			data : array varint {
+				name : string;
+				value : varint;
+			};
 		};
 
-		remove {
-			action=1;
+		vehicle_move {
+			id=0x29;
+			x, y, z : double;
+			yaw, pitch : float;
 		};
 
-		health {
-			action=2;
-			health : float;
+		abilities {
+			id=0x2b;
+			flags : byte;
+			fly, walk : float;
 		};
 
-		title {
-			action=3;
-			title : string;
+		combat {
+			id=0x2c;
+			event : varint;
+
+			start {
+				event=0;
+			}
+
+			end {
+				event=1;
+				duration : varint;
+				entity : int;
+			};
+
+			dead {
+				event=2;
+				player : varint;
+				entity : int;
+				message : string;
+			};
 		};
 
-		style {
-			action=4;
-			color, divisions : varint;
+		cooldown {
+			id=0x17;
+			item, cooldown : varint;
 		};
 
-		flags {
-			action=5;
-			flags : ubyte;
-		};
-	};
-
-	difficulty {
-		id=0x0d;
-		difficulty : ubyte;
-	};
-
-	tab {
-		id=0x0e;
-		matches : array varint string;
-	};
-
-	message {
-		id=0x0f;
-		message : string;
-		position : ubyte;
-	};
-
-	update_blocks {
-		id=0x10;
-		x, z : int;
-		records : array varint record {
-			# xz IS INTENTIONAL
-			xz, y : ubyte;
-			block : varint;
-		};
-	};
-
-	transaction {
-		id=0x11;
-		window : byte;
-		action : short;
-		accepted : bool;
-	};
-
-	close_window {
-		id=0x12;
-		window : byte;
-	};
-
-	open_window {
-		id=0x13;
-		window : byte;
-		type, string : string;
-		size : ubyte;
-		horse {
-			title="EntityHorse";
-			entity : int;
-		};
-	};
-
-	window_items {
-		id=0x14;
-		window : byte;
-		items : array short slot;
-	};
-
-	window_property {
-		id=0x15;
-		key, value : short;
-	};
-
-	update_window {
-		id=0x16;
-		slot : short;
-		item : slot;
-	}
-
-	cooldown {
-		id=0x17;
-		item, cooldown : varint;
-	};
-
-	plugin_message {
-		id=0x18;
-		channel : string;
-		data : bytes_eof;
-	};
-
-	named_sound {
-		id=0x19;
-		name : string;
-		category : int;
-		x, y, z : int;
-		volume, pitch : float;
-	};
-
-	kick {
-		id=0x1a;
-		message : string;
-	};
-
-	entity_status {
-		id=0x1b;
-		entity : int;
-		status : byte;
-	};
-
-	explosion {
-		id=0x1c;
-		x, y, z, r : float;
-		records : array int record {
-			x, y, z : byte;
-		};
-
-		# applied to the player
-		vx, vy, vz : float;
-	};
-
-	unload_chunk {
-		id=0x1d;
-		x, z : int;
-	};
-
-	game_state {
-		id=0x1e;
-		reason : ubyte;
-		value : float;
-	};
-
-	keepalive {
-		id=0x1f;
-		timestamp : varint;
-	};
-
-	chunk {
-		id=0x20;
-		x, z : int;
-		continuous : bool;
-		mask : varint;
-		data : bytes;
-		tiles : array varint nbt;
-	};
-
-	effect {
-		id=0x21;
-		effect : int;
-		at : position;
-		data : int;
-		global : bool;
-	};
-
-	particle {
-		id=0x22;
-		particle : int;
-		far : bool;
-		x, y, z, ox, oy, oz, data : float;
-		count : int;
-		data : bytes_eof;
-	};
-
-	join_game {
-		id=0x23;
-		entity : int;
-		gamemode : byte;
-		dimension : int;
-		difficulty, max_players : ubyte;
-		level_type : string;
-		reduced_debug : bool;
-	};
-
-	map {
-		id=0x24;
-		map : varint;
-		scale : byte;
-		show_icons : bool;
-		icons : array varint icon {
-			type, x, z : ubyte;
-		};
-		columns : ubyte;
-
-		update {
-			columns > 0;
-			rows, x, z : ubyte;
-			data : bytes;
-		};
-	};
-
-	entity {
-		move {
-			id=0x25;
-			entity : varint;
-			dx, dy, dz : short;
-			on_ground : bool;
-		};
-
-		look_move {
-			id=0x26;
-			entity : varint;
-			dx, dy, dz : short;
-			yaw, pitch : angle;
-			on_ground : bool;
-		};
-
-		look {
-			id=0x27;
-			entity : varint;
-			yaw, pitch : angle;
-			on_ground : bool;
-			
-		};
-
-		idle {
-			id=0x28;
-			entity : varint;
-		};
-
-		head_look {
-			id=0x34;
-			entity : varint;
-			head_yaw : angle;
-		};
-
-		metadata {
-			id=0x39;
-			entity : varint;
-			metadata : metadata;
-		};
-
-		attach {
-			id=0x3a;
-			#fixme? better field names
-			entity, holding : int;
-		};
-
-		velocity {
-			id=0x3b;
-			entity : varint;
-			vx, vy, vz : short;
-		};
-
-		equipment {
-			id=0x3c;
-			entity, slot : varint;
-			item : slot;
-		};
-
-		collect {
-			id=0x48;
-			entity, collector, count : varint;
+		game_state {
+			id=0x1e;
+			reason : ubyte;
+			value : float;
 		};
 
 		teleport {
-			id=0x49;
+			id=0x2e;
 			x, y, z : double;
-			yaw, pitch : angle;
-			on_ground : bool;
+			yaw, pitch : float;
+			flags : byte;
+			teleport : varint;
 		};
 
-		properties {
-			id=0x4a;
-			entity : varint;
-			properties : array int property {
-				key : string;
-				value : double;
-				modifiers : array varint modifier {
-					uuid : uuid;
-					ammount : double;
-					operation : byte;
-				};
+		respawn {
+			id=0x33;
+			dimension : int;
+			difficulty, gamemode : byte;
+			level_type : string;
+		};
+
+		camera {
+			id=0x36;
+			camera : varint;
+		};
+
+		health {
+			id=0x3e;
+			health : float;
+			food : varint;
+			saturation : float;
+		};
+	};
+
+	world {
+		block_break {
+			id=0x08;
+			at : position;
+			stage : byte;
+		};
+
+		update_tile {
+			id=0x09;
+			at : position;
+			tile : nbt;
+		};
+
+		block_action {
+			id=0x0a;
+			action, param : ubyte;
+			block : varint;
+		};
+
+		update_block {
+			id=0x0b;
+			at : position;
+			block : varint;
+		};
+
+		difficulty {
+			id=0x0d;
+			difficulty : ubyte;
+		};
+
+		update_blocks {
+			id=0x10;
+			x, z : int;
+			records : array varint record {
+				# xz IS INTENTIONAL
+				xz, y : ubyte;
+				block : varint;
 			};
+		};
+
+		named_sound {
+			id=0x19;
+			name : string;
+			category : int;
+			x, y, z : int;
+			volume, pitch : float;
+		};
+
+		explosion {
+			id=0x1c;
+			x, y, z, r : float;
+			records : array int record {
+				x, y, z : byte;
+			};
+
+			# applied to the player
+			vx, vy, vz : float;
+		};
+
+		unload_chunk {
+			id=0x1d;
+			x, z : int;
+		};
+
+		chunk {
+			id=0x20;
+			x, z : int;
+			continuous : bool;
+			mask : varint;
+			data : bytes;
+			tiles : array varint nbt;
 		};
 
 		effect {
-			id=0x4b;
-			effect, amplifier : byte;
-			duration : varint;
-			flags : byte;
-		};
-	};
-
-	vehicle {
-		id=0x29;
-		x, y, z : double;
-		yaw, pitch : float;
-	};
-
-	open_sign {
-		id=0x2a;
-		at : position;
-	};
-
-	abilities {
-		id=0x2b;
-		flags : byte;
-		fly, walk : float;
-	};
-
-	combat {
-		id=0x2c;
-		event : varint;
-
-		start {
-			event=0;
-		}
-
-		end {
-			event=1;
-			duration : varint;
-			entity : int;
+			id=0x21;
+			effect : int;
+			at : position;
+			data : int;
+			global : bool;
 		};
 
-		dead {
-			event=2;
-			player : varint;
-			entity : int;
-			message : string;
+		particle {
+			id=0x22;
+			particle : int;
+			far : bool;
+			x, y, z, ox, oy, oz, data : float;
+			count : int;
+			data : bytes_eof;
 		};
-	};
 
-	player_list {
-		id=0x2d;
-		action : varint;
-
-		add {
-			action=0;
-			items : array varint item {
+		entity {
+			spawn_object {
+				id=0x00;
+				entity : varint;
 				uuid : uuid;
-				name : string;
-				properties : array varint property {
-					name, value : string;
-					signature : bool_optional string;
+				type : byte;
+				x, y, z : double;
+				pitch, yaw : angle;
+				data : int;
+				vx, vy, vz : short;
+			};
+
+			spawn_orb {
+				id=0x01;
+				entity : varint;
+				x, y, z : double;
+				size : short;
+			};
+
+			spawn_global {
+				id=0x02;
+				entity : varint;
+				type : byte;
+				x, y, z : double;
+			};
+
+			spawn_mob {
+				id=0x03;
+				entity : varint;
+				uuid : uuid;
+				type : byte;
+				x, y, z : double;
+				yaw, pitch, head_pitch : angle;
+				v_x, v_y, v_z : short;
+				metadata : metadata;
+			};
+
+			spawn_painting {
+				id=0x04;
+				entity : varint;
+				uuid : uuid;
+				title : string;
+				at : position;
+				direction : byte
+			};
+
+			spawn_player {
+				id=0x05;
+				entity : varint;
+				uuid : uuid;
+				x, y, z : double;
+				yaw, pitch : angle;
+				metadata : metadata;
+			};
+
+			animate {
+				id=0x06;
+				entity : varint;
+				action : ubyte;
+			};
+
+			status {
+				id=0x1b;
+				entity : int;
+				status : byte;
+			};
+
+			move {
+				id=0x25;
+				entity : varint;
+				dx, dy, dz : short;
+				on_ground : bool;
+			};
+
+			look_move {
+				id=0x26;
+				entity : varint;
+				dx, dy, dz : short;
+				yaw, pitch : angle;
+				on_ground : bool;
+			};
+
+			look {
+				id=0x27;
+				entity : varint;
+				yaw, pitch : angle;
+				on_ground : bool;
+				
+			};
+
+			idle {
+				id=0x28;
+				entity : varint;
+			};
+
+			use_bed {
+				id=0x2f;
+				entity : varint;
+				at : position;
+			};
+
+			destroy {
+				id=0x30;
+				entities : array varint varint;
+			};
+
+			remove_effect {
+				id=0x31;
+				entity : varint;
+				effect : byte;
+			};
+
+			head_look {
+				id=0x34;
+				entity : varint;
+				head_yaw : angle;
+			};
+
+			metadata {
+				id=0x39;
+				entity : varint;
+				metadata : metadata;
+			};
+
+			attach {
+				id=0x3a;
+				#fixme? better field names
+				entity, holding : int;
+			};
+
+			velocity {
+				id=0x3b;
+				entity : varint;
+				vx, vy, vz : short;
+			};
+
+			equipment {
+				id=0x3c;
+				entity, slot : varint;
+				item : slot;
+			};
+
+			passengers {
+				id=0x40;
+				passengers : array varint varint;
+			};
+
+			collect {
+				id=0x48;
+				entity, collector, count : varint;
+			};
+
+			teleport {
+				id=0x49;
+				x, y, z : double;
+				yaw, pitch : angle;
+				on_ground : bool;
+			};
+
+			properties {
+				id=0x4a;
+				entity : varint;
+				properties : array int property {
+					key : string;
+					value : double;
+					modifiers : array varint modifier {
+						uuid : uuid;
+						ammount : double;
+						operation : byte;
+					};
 				};
-				gamemode, latency : varint;
-				display_name : bool_optional string;
+			};
+
+			effect {
+				id=0x4b;
+				effect, amplifier : byte;
+				duration : varint;
+				flags : byte;
 			};
 		};
 
-		gamemode {
-			action=1;
-			items : array varint item {
-				uuid : uuid;
-				gamemode : varint;
+		border {
+			id=0x35;
+			action : varint;
+
+			size {
+				action=0;
+				diameter : double;
+			};
+
+			lerp {
+				action=1;
+				old_diameter, new_diameter : double;
+				speed : varlong;
+			};
+
+			center {
+				action=2;
+				x, z : double;
+			};
+
+			init {
+				action=3;
+				x, z double;
+				old_diameter, new_diameter : double;
+				speed : varlong;
+				portal_boundary, warn_time, warn_size : varint;
+			};
+
+			warning_time {
+				action=4;
+				warn_time : varint;
+			};
+
+			warning_size {
+				action=5;
+				warn_size : varint;
 			};
 		};
 
-		latency {
-			action=2;
-			items : array varint item {
-				uuid : uuid;
-				latency : varint;
+		compass_center {
+			id=0x43;
+			at : position;
+		};
+
+		time {
+			id=0x44;
+			age, timeofday : long;
+		};
+
+		sound {
+			id=0x46;
+			sound, category : varint;
+			x, y, z : int;
+			volume, pitch : float;
+		};
+	};
+
+	gui {
+		boss_bar {
+			id=0x0c;
+			uuid : uuid;
+			action : varint;
+
+			create {
+				action=0;
+				title : string;
+				health : float;
+				color, divisions : varint;
+				flags : ubyte;
+			};
+
+			remove {
+				action=1;
+			};
+
+			health {
+				action=2;
+				health : float;
+			};
+
+			title {
+				action=3;
+				title : string;
+			};
+
+			style {
+				action=4;
+				color, divisions : varint;
+			};
+
+			flags {
+				action=5;
+				flags : ubyte;
 			};
 		};
 
-		display_name {
-			action=3;
-			items : array varint item {
-				uuid : uuid;
-				display_name : bool_optional string;
+		tab {
+			id=0x0e;
+			matches : array varint string;
+		};
+
+		message {
+			id=0x0f;
+			message : string;
+			position : ubyte;
+		};
+
+		edit_sign {
+			id=0x2a;
+			at : position;
+		};
+
+		window {
+			transaction {
+				id=0x11;
+				window : byte;
+				action : short;
+				accepted : bool;
+			};
+
+			close {
+				id=0x12;
+				window : byte;
+			};
+
+			open {
+				id=0x13;
+				window : byte;
+				type, string : string;
+				size : ubyte;
+				horse {
+					title="EntityHorse";
+					entity : int;
+				};
+			};
+
+			items {
+				id=0x14;
+				window : byte;
+				items : array short slot;
+			};
+
+			property {
+				id=0x15;
+				key, value : short;
+			};
+
+			update {
+				id=0x16;
+				slot : short;
+				item : slot;
 			};
 		};
 
-		remove {
-			action=4;
-			items : array varint uuid;
-		};
-	};
+		map {
+			id=0x24;
+			map : varint;
+			scale : byte;
+			show_icons : bool;
+			icons : array varint icon {
+				type, x, z : ubyte;
+			};
+			columns : ubyte;
 
-	teleport {
-		id=0x2e;
-		x, y, z : double;
-		yaw, pitch : float;
-		flags : byte;
-		teleport : varint;
-	};
+			icons {
+				columns=0;
+			};
 
-	use_bed {
-		id=0x2f;
-		entity : varint;
-		at : position;
-	};
-
-	destroy_entities {
-		id=0x30;
-		entities : array varint varint;
-	};
-
-	remove_effect {
-		id=0x31;
-		entity : varint;
-		effect : byte;
-	};
-
-	resource {
-		id=0x32;
-		url, sha1 : string;
-	};
-
-	respawn {
-		id=0x33;
-		dimension : int;
-		difficulty, gamemode : byte;
-		level_type : string;
-	};
-
-	border {
-		id=0x35;
-		action : varint;
-
-		size {
-			action=0;
-			diameter : double;
+			data {
+				rows, x, z : ubyte;
+				data : bytes;
+			};
 		};
 
-		lerp {
-			action=1;
-			old_diameter, new_diameter : double;
-			speed : varlong;
+		player_list {
+			id=0x2d;
+			action : varint;
+
+			add {
+				action=0;
+				items : array varint item {
+					uuid : uuid;
+					name : string;
+					properties : array varint property {
+						name, value : string;
+						signature : bool_optional string;
+					};
+					gamemode, latency : varint;
+					display_name : bool_optional string;
+				};
+			};
+
+			gamemode {
+				action=1;
+				items : array varint item {
+					uuid : uuid;
+					gamemode : varint;
+				};
+			};
+
+			latency {
+				action=2;
+				items : array varint item {
+					uuid : uuid;
+					latency : varint;
+				};
+			};
+
+			display_name {
+				action=3;
+				items : array varint item {
+					uuid : uuid;
+					display_name : bool_optional string;
+				};
+			};
+
+			remove {
+				action=4;
+				items : array varint uuid;
+			};
 		};
 
-		center {
-			action=2;
-			x, z : double;
+		resource {
+			id=0x32;
+			url, sha1 : string;
 		};
 
-		init {
-			action=3;
-			x, z double;
-			old_diameter, new_diameter : double;
-			speed : varlong;
-			portal_boundary, warn_time, warn_size : varint;
+		scoreboard {
+			display {
+				id=0x38;
+				position : byte;
+				name : string;
+			};
+
+			objective {
+				id=0x3f;
+				name : string;
+				mode : byte;
+
+				create {
+					mode=0;
+					value, type : string;
+				};
+
+				remove {
+					mode=1;
+				};
+
+				update {
+					mode=2;
+					value, type : string;
+				};
+			};
+
+			score {
+				id=0x42;
+				action : byte;
+
+				update {
+					action=0;
+					name, objective : string;
+					value : varint;
+				};
+
+				remove {
+					action=1;
+					name, objective : string;
+				};
+			};
 		};
 
-		warning_time {
-			action=4;
-			warn_time : varint;
+		held_item {
+			id=0x37;
+			slot : byte;
 		};
 
-		warning_size {
-			action=5;
-			warn_size : varint;
-		};
-	};
-
-	camera {
-		id=0x36;
-		camera : varint;
-	};
-
-	held_item {
-		id=0x37;
-		slot : byte;
-	};
-
-	scoreboard {
-		display {
-			id=0x38;
-			position : byte;
-			name : string;
+		xp {
+			id=0x3d;
+			xp_bar : float;
+			level, total : varint;
 		};
 
-		objective {
-			id=0x3f;
+		team {
+			id=0x41;
 			name : string;
 			mode : byte;
 
 			create {
 				mode=0;
-				value, type : string;
+				display, prefix, suffix : string;
+				flags : byte;
+				nametag_visibility, collision : string;
+				color : byte;
+				players : array varint string;
 			};
 
 			remove {
@@ -793,135 +861,87 @@ play315_cb {
 			};
 
 			update {
-				mode=2;
-				value, type : string;
+				mode=2
+				display, prefix, suffix : string;
+				flags : byte;
+				nametag_visibility, collision : string;
+				color : byte;
+			};
+
+			add_players {
+				mode=3;
+				players : array varint string;
+			};
+
+			remove_players {
+				mode=4;
+				players : array varint string;
 			};
 		};
 
-		score {
-			id=0x42;
-			action : byte;
-
-			update {
+		title {
+			id=0x45;
+			action : varint;
+			text {
 				action=0;
-				name, objective : string;
-				value : varint;
+				text : string;
 			};
 
-			remove {
+			subtitle {
 				action=1;
-				name, objective : string;
+				text : string;
+			};
+
+			action_bar {
+				action=2;
+				text : string;
+			};
+
+			fade {
+				action=3;
+				fade_in, stay, fade_out : int;
+			};
+
+			hide {
+				action=4;
+			};
+
+			reset {
+				aciton=5;
 			};
 		};
-	};
 
-	xp {
-		id=0x3d;
-		xp_bar : float;
-		level, total : varint;
-	};
-
-	health {
-		id=0x3e;
-		health : float;
-		food : varint;
-		saturation : float;
-	};
-
-	passengers {
-		id=0x40;
-		passengers : array varint varint;
-	};
-
-	team {
-		id=0x41;
-		name : string;
-		mode : byte;
-
-		create {
-			mode=0;
-			display, prefix, suffix : string;
-			flags : byte;
-			nametag_visibility, collision : string;
-			color : byte;
-			players : array varint string;
-		};
-
-		remove {
-			mode=1;
-		};
-
-		update {
-			mode=2
-			display, prefix, suffix : string;
-			flags : byte;
-			nametag_visibility, collision : string;
-			color : byte;
-		};
-
-		add_players {
-			mode=3;
-			players : array varint string;
-		};
-
-		remove_players {
-			mode=4;
-			players : array varint string;
+		player_list_text {
+			id=0x47;
+			header, footer : string;
 		};
 	};
 
-	compass_center {
-		id=0x43;
-		at : position;
-	};
-
-	time {
-		id=0x44;
-		age, timeofday : long;
-	};
-
-	title {
-		id=0x45;
-		action : varint;
-		text {
-			action=0;
-			text : string;
+	client {
+		plugin_message {
+			id=0x18;
+			channel : string;
+			data : bytes_eof;
 		};
 
-		subtitle {
-			action=1;
-			text : string;
+		kick {
+			id=0x1a;
+			message : string;
 		};
 
-		action_bar {
-			action=2;
-			text : string;
+		keepalive {
+			id=0x1f;
+			timestamp : varint;
 		};
 
-		fade {
-			action=3;
-			fade_in, stay, fade_out : int;
+		join_game {
+			id=0x23;
+			entity : int;
+			gamemode : byte;
+			dimension : int;
+			difficulty, max_players : ubyte;
+			level_type : string;
+			reduced_debug : bool;
 		};
-
-		hide {
-			action=4;
-		};
-
-		reset {
-			aciton=5;
-		};
-	};
-
-	sound {
-		id=0x46;
-		sound, category : varint;
-		x, y, z : int;
-		volume, pitch : float;
-	};
-
-	player_list_header_footer {
-		id=0x47;
-		header, footer : string;
 	};
 };
-
