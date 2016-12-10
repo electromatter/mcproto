@@ -1,9 +1,11 @@
-handshake_start {
-	id : varint; id=0x00;
-	version : varint;
-	address : string;
-	port : ushort;
-	target : varint;
+handshake_sb {
+	start {
+		id : varint; id=0x00;
+		version : varint;
+		address : string;
+		port : ushort;
+		target : varint;
+	};
 };
 
 status_sb {

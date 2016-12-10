@@ -111,16 +111,16 @@ play315_sb {
 			target, type : varint;
 
 			interact {
-				type=0x00;
+				type=0;
 				hand : varint;
 			};
 
 			attack {
-				type=0x01;
+				type=1;
 			};
 
 			interact_at {
-				type=0x02;
+				type=2;
 				x, y, z : float;
 				hand : varint;
 			};
@@ -210,10 +210,21 @@ play315_cb {
 	player {
 		stats {
 			id=0x07;
-			data : array varint {
+			data : array varint stat {
 				name : string;
 				value : varint;
 			};
+		};
+
+		cooldown {
+			id=0x17;
+			item, cooldown : varint;
+		};
+
+		game_state {
+			id=0x1e;
+			reason : ubyte;
+			value : float;
 		};
 
 		vehicle_move {
@@ -248,17 +259,6 @@ play315_cb {
 				entity : int;
 				message : string;
 			};
-		};
-
-		cooldown {
-			id=0x17;
-			item, cooldown : varint;
-		};
-
-		game_state {
-			id=0x1e;
-			reason : ubyte;
-			value : float;
 		};
 
 		teleport {
