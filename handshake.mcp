@@ -13,7 +13,7 @@ status_sb {
 		id=0x00;
 	};
 
-	status_ping {
+	ping {
 		id=0x01;
 		timestamp : long;
 	};
@@ -22,13 +22,13 @@ status_sb {
 status_cb {
 	id : varint;
 
-	status_response {
+	response {
 		id=0x00
 		status : string;
 	};
 
-	status_pong {
-		id=0x01;
+	pong {
+		id = 0x01;
 		timestamp : long;
 	};
 };
@@ -36,12 +36,12 @@ status_cb {
 login_sb {
 	id : varint;
 
-	login_start {
+	start {
 		 id=0x00;
 		username : string;
 	};
 
-	login_response {
+	response {
 		id=0x01;
 		secret, token : bytes;
 	};
@@ -50,26 +50,25 @@ login_sb {
 login_cb {
 	id : varint;
 
-	login_kick {
+	kick {
 		id=0x00;
 		reason : string;
 	};
 
-	login_request {
+	request {
 		id=0x01;
 		server_id : string;
 		pubkey, token : bytes;
 	};
 
-	login_success {
+	success {
 		id=0x02;
 		uuid : uuid_string;
 		username : string;
 	};
 
-	login_compression {
-		id=0x02;
+	compression {
+		id=0x03;
 		threshold : varint;
 	};
 };
-
