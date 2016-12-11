@@ -112,16 +112,16 @@ play315 {
 				target, type : varint;
 
 				interact {
-					type=0x00;
+					type=0;
 					hand : varint;
 				}
 
 				attack {
-					type=0x01;
+					type=1;
 				}
 
 				interact_at {
-					type=0x02;
+					type=2;
 					x, y, z : float;
 					hand : varint;
 				}
@@ -211,7 +211,7 @@ play315 {
 		player {
 			stats {
 				id=0x07;
-				data : array varint {
+				data : array varint stat {
 					name : string;
 					value : varint;
 				};
