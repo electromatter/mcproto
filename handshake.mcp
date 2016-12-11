@@ -1,78 +1,82 @@
-handshake_sb {
-	id : varint;
+handshake {
+	sb {
+		start {
+			id : varint; id=0x00;
+			version : varint;
+			address : string;
+			port : ushort;
+			target : varint;
+		}
+	}
+}
 
-	start {
-		id=0x00;
-		version : varint;
-		address : string;
-		port : ushort;
-		target : varint;
-	};
-};
+status {
+	sb {
+		id : varint;
 
-status_sb {
-	id : varint;
+		request {
+			id=0x00;
+		};
 
-	request {
-		id=0x00;
-	};
+		ping {
+			id=0x01;
+			timestamp : long;
+		}
+	}
 
-	ping {
-		id=0x01;
-		timestamp : long;
-	};
-};
+	cb {
+		id : varint;
 
-status_cb {
-	id : varint;
+		response {
+			id=0x00
+			status : string;
+		}
 
-	response {
-		id=0x00
-		status : string;
-	};
+		pong {
+			id = 0x01;
+			timestamp : long;
+		}
+	}
+}
 
-	pong {
-		id = 0x01;
-		timestamp : long;
-	};
-};
+login {
+	sb {
+		id : varint;
 
-login_sb {
-	id : varint;
+		start {
+			 id=0x00;
+			username : string;
+		}
 
-	start {
-		 id=0x00;
-		username : string;
-	};
+		response {
+			id=0x01;
+			secret, token : bytes;
+		}
+	}
 
-	response {
-		id=0x01;
-		secret, token : bytes;
-	};
-};
+	cb {
+		id : varint;
 
-login_cb {
-	id : varint;
+		kick {
+			id=0x00;
+			reason : string;
+		}
 
-	kick {
-		id=0x00;
-		reason : string;
-	};
+		request {
+			id=0x01;
+			server_id : string;
+			pubkey, token : bytes;
+		}
 
-	request {
-		id=0x01;
-		server_id : string;
-		pubkey, token : bytes;
-	};
+		success {
+			id=0x02;
+			uuid : uuid_string;
+			username : string;
+		}
 
-	success {
-		id=0x02;
-		uuid : uuid_string;
-		username : string;
-	};
-
-	compression {
-		id=0x03;
-		threshold : varint;
-	};
-};
+		compression {
+			id=0x03;
+			threshold : varint;
+		}
+	}
+}
