@@ -1,11 +1,11 @@
 type enum_type_name : enum enum_base_type {
-	VALUE = 1,
-	OTHER_VALUE = 2
+	VALUE = 1;
+	OTHER_VALUE = 2;
 };
 
 type flag_type_name : flag flag_base_type {
-	FLAG = 0x001,
-	OTHER_FLAG = 0x002
+	FLAG = 0x01;
+	OTHER_FLAG = 0x02;
 };
 
 # a bit field type the number after bits
