@@ -25,9 +25,13 @@ type bit_field_name : bits 64 {
 type name : alias;
 
 #namespaces/variants
-name {
+namespace name {
 	#non variant type
 	type name {
 		derp : varint;
+	};
+	
+	variant other_name {
+		field : varint;
 	};
 };
