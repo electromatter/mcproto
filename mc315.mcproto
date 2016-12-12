@@ -109,31 +109,31 @@ play315 {
 
 			use_entity {
 				id=0x0a;
-				target, type : varint;
+				target, action : varint;
 
 				interact {
-					type=0;
+					action=0;
 					hand : varint;
 				}
 
 				attack {
-					type=1;
+					action=1;
 				}
 
 				interact_at {
-					type=2;
+					action=2;
 					x, y, z : float;
 					hand : varint;
 				}
 			}
 
-			position {
+			move {
 				id=0x0c;
 				x, y, z : double;
 				on_ground : bool;
 			}
 
-			look_position {
+			look_move {
 				id=0x0d;
 				x, y, z : double;
 				yaw, pitch : float;
@@ -385,7 +385,7 @@ play315 {
 					id=0x00;
 					entity : varint;
 					uuid : uuid;
-					type : byte;
+					kind : byte;
 					x, y, z : double;
 					pitch, yaw : angle;
 					data : int;
@@ -402,7 +402,7 @@ play315 {
 				spawn_global {
 					id=0x02;
 					entity : varint;
-					type : byte;
+					kind : byte;
 					x, y, z : double;
 				}
 
@@ -410,7 +410,7 @@ play315 {
 					id=0x03;
 					entity : varint;
 					uuid : uuid;
-					type : byte;
+					kind : byte;
 					x, y, z : double;
 					yaw, pitch, head_pitch : angle;
 					v_x, v_y, v_z : short;
@@ -689,10 +689,10 @@ play315 {
 				open {
 					id=0x13;
 					window : byte;
-					type, string : string;
+					kind, title : string;
 					size : ubyte;
 					horse {
-						title="EntityHorse";
+						kind="EntityHorse";
 						entity : int;
 					}
 				}
@@ -802,7 +802,7 @@ play315 {
 
 					create {
 						mode=0;
-						value, type : string;
+						value, kind : string;
 					}
 
 					remove {
@@ -811,7 +811,7 @@ play315 {
 
 					update {
 						mode=2;
-						value, type : string;
+						value, kind : string;
 					}
 				}
 

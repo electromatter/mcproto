@@ -1,7 +1,8 @@
-handshake {
-	sb {
-		start {
-			id : varint; id=0x00;
+namespace handshake {
+	variant sb {
+		id : varint;
+		variant start {
+			id=0x00;
 			version : varint;
 			address : string;
 			port : ushort;
@@ -10,71 +11,71 @@ handshake {
 	}
 }
 
-status {
-	sb {
+namespace status {
+	variant sb {
 		id : varint;
 
-		request {
+		variant request {
 			id=0x00;
 		};
 
-		ping {
+		variant ping {
 			id=0x01;
 			timestamp : long;
 		}
 	}
 
-	cb {
+	variant cb {
 		id : varint;
 
-		response {
+		variant response {
 			id=0x00
 			status : string;
 		}
 
-		pong {
+		variant pong {
 			id = 0x01;
 			timestamp : long;
 		}
 	}
 }
 
-login {
-	sb {
+namespace login {
+	variant sb {
 		id : varint;
 
-		start {
+		variant start {
 			 id=0x00;
 			username : string;
 		}
 
-		response {
+		variant response {
 			id=0x01;
 			secret, token : bytes;
 		}
 	}
 
-	cb {
+	namespace cb {
 		id : varint;
 
-		kick {
+		variant kick {
 			id=0x00;
 			reason : string;
 		}
 
-		request {
+		variant request {
 			id=0x01;
 			server_id : string;
 			pubkey, token : bytes;
 		}
 
-		success {
+		variant success {
 			id=0x02;
 			uuid : uuid_string;
 			username : string;
 		}
 
-		compression {
+		variant compression {
 			id=0x03;
 			threshold : varint;
 		}
