@@ -1,17 +1,17 @@
-enum_type_name : enum enum_base_type {
+type enum_type_name : enum enum_base_type {
 	VALUE = 1,
 	OTHER_VALUE = 2
-}
+};
 
-flag_type_name : flag flag_base_type {
+type flag_type_name : flag flag_base_type {
 	FLAG = 0x001,
 	OTHER_FLAG = 0x002
-}
+};
 
 # a bit field type the number after bits
 # tells the number of bits total
 # must be byte aligned.
-bit_field_name : bits 64 {
+type bit_field_name : bits 64 {
 	# twos complement value
 	x : signed 24;
 
@@ -19,4 +19,15 @@ bit_field_name : bits 64 {
 
 	# bits in exponent and bits in significant
 	z : float 3 20;
-}
+};
+
+#aliases
+type name : alias;
+
+#namespaces/variants
+name {
+	#non variant type
+	type name {
+		derp : varint;
+	};
+};
