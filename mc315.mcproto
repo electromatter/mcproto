@@ -1,5 +1,3 @@
-#packets that require special attention: map, open window, player list item, tab complete
-
 namespace play315 {
 	variant sb {
 		id : varint
@@ -620,8 +618,7 @@ namespace play315 {
 		namespace gui {
 			variant boss_bar {
 				id=0x0c;
-				#FIXME reserved name
-				uuid : uuid;
+				boss_uuid : uuid;
 				action : varint;
 
 				variant create {
@@ -665,8 +662,7 @@ namespace play315 {
 			variant message {
 				id=0x0f;
 				message : string;
-				#FIXME reserved name
-				position : ubyte;
+				location : ubyte;
 			};
 
 			variant edit_sign {
@@ -722,8 +718,7 @@ namespace play315 {
 				scale : byte;
 				show_icons : bool;
 				icons : array varint icon {
-					#FIXME reserved name
-					type, x, z : ubyte;
+					icon_type, x, z : ubyte;
 				};
 				columns : ubyte;
 
@@ -744,8 +739,7 @@ namespace play315 {
 				variant add {
 					action=0;
 					items : array varint item {
-						#FIXME reserved name
-						uuid : uuid;
+						player_uuid : uuid;
 						name : string;
 						properties : array varint property {
 							name, value : string;
@@ -759,8 +753,7 @@ namespace play315 {
 				variant gamemode {
 					action=1;
 					items : array varint item {
-						#FIXME reserved name
-						uuid : uuid;
+						player_uuid : uuid;
 						gamemode : varint;
 					};
 				};
@@ -768,8 +761,7 @@ namespace play315 {
 				variant latency {
 					action=2;
 					items : array varint item {
-						#FIXME reserved name
-						uuid : uuid;
+						player_uuid : uuid;
 						latency : varint;
 					};
 				};
@@ -777,8 +769,7 @@ namespace play315 {
 				variant display_name {
 					action=3;
 					items : array varint item {
-						#FIXME reserved name
-						uuid : uuid;
+						player_uuid : uuid;
 						display_name : bool_optional string;
 					};
 				};
@@ -797,8 +788,7 @@ namespace play315 {
 			namespace scoreboard {
 				variant display {
 					id=0x38;
-					#FIXME reserved name
-					position : byte;
+					location : byte;
 					name : string;
 				};
 

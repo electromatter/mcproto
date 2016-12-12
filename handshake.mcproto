@@ -45,7 +45,7 @@ namespace login {
 		id : varint;
 
 		variant start {
-			 id=0x00;
+			id=0x00;
 			username : string;
 		}
 
@@ -71,7 +71,7 @@ namespace login {
 
 		variant success {
 			id=0x02;
-			uuid : uuid_string;
+			player_uuid : uuid_string;
 			username : string;
 		}
 
