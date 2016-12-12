@@ -1,16 +1,16 @@
 #packets that require special attention: map, open window, player list item, tab complete
 
-play315 {
-	sb {
+namespace play315 {
+	variant sb {
 		id : varint
 
-		client {
-			status {
+		namespace client {
+			variant status {
 				id=0x03;
 				status : varint;
-			}
+			};
 
-			settings {
+			variant settings {
 				id=0x04;
 				locale : string;
 				view_distance : byte;
@@ -18,46 +18,46 @@ play315 {
 				chat_colors : bool;
 				skin_parts : ubyte;
 				main_hand : varint;
-			}
+			};
 
-			plugin_message {
+			variant plugin_message {
 				id=0x09;
 				channel : string;
 				message : bytes_eof;
-			}
+			};
 
-			keep_alive {
+			variant keep_alive {
 				id=0x0b;
 				timestamp : varint;
-			}
-		}
+			};
+		};
 
-		gui {
-			tab {
+		namespace gui {
+			variant tab {
 				id=0x01;
 				command : bool;
 				at : bool_optional position;
-			}
+			};
 
-			message {
+			variant message {
 				id=0x02;
 				message : string;
-			}
+			};
 
-			window {
-				transaction {
+			namespace window {
+				variant transaction {
 					id=0x05;
 					window : byte;
 					action : short;
 					accepted : bool;
-				}
+				};
 
-				enchant_item {
+				variant enchant_item {
 					id=0x06;
 					window, item : byte;	
-				}
+				};
 
-				click {
+				variant click {
 					id=0x07;
 					window : byte;
 					slot : short;
@@ -65,262 +65,262 @@ play315 {
 					action : short;
 					mode : varint;
 					item : slot;
-				}
+				};
 
-				close {
+				variant close {
 					id=0x08;
 					window : byte;
-				}
-			}
+				};
+			};
 
-			resource_status {
+			variant resource_status {
 				id=0x16;
 				status : varint;
-			}
+			};
 
-			held_item {
+			variant held_item {
 				id=0x17;
-				slot : short;
-			}
+				index : short;
+			};
 
-			creative_item {
+			variant creative_item {
 				id=0x18;
-				slot : short;
+				index : short;
 				item : slot;
-			}
+			};
 
-			update_sign {
+			variant update_sign {
 				id=0x19;
 				at : position;
 				lines : array 4 string;
-			}
+			};
 
-			spectate {
+			variant spectate {
 				id=0x1b;
 				target : uuid;
-			}
-		}
+			};
+		};
 
-		player {
-			teleport {
+		namespace player {
+			variant teleport {
 				id=0x00;
 				teleport_id : varint;
-			}
+			};
 
-			use_entity {
+			variant use_entity {
 				id=0x0a;
 				target, action : varint;
 
-				interact {
+				variant interact {
 					action=0;
 					hand : varint;
-				}
+				};
 
-				attack {
+				variant attack {
 					action=1;
-				}
+				};
 
-				interact_at {
+				variant interact_at {
 					action=2;
 					x, y, z : float;
 					hand : varint;
-				}
-			}
+				};
+			};
 
-			move {
+			variant move {
 				id=0x0c;
 				x, y, z : double;
 				on_ground : bool;
-			}
+			};
 
-			look_move {
+			variant look_move {
 				id=0x0d;
 				x, y, z : double;
 				yaw, pitch : float;
 				on_ground : bool;
-			}
+			};
 
-			look {
+			variant look {
 				id=0x0e;
 				yaw, pitch : float;
 				on_ground : bool;
-			}
+			};
 
-			ground {
+			variant ground {
 				id=0x0f;
 				on_ground : bool;
-			}
+			};
 
-			vehicle_move {
+			variant vehicle_move {
 				id=0x10;
 				x, y, z : double;
 				yaw, pitch : float;
-			}
+			};
 
-			steer_boat {
+			variant steer_boat {
 				id=0x11;
 				right, left : bool;
-			}
+			};
 
-			abilities {
+			variant abilities {
 				id=0x12;
 				flags : byte;
 				fly, walk : float;
-			}
+			};
 
-			digging {
+			variant digging {
 				id=0x13;
 				status : varint;
 				at : position;
 				face = byte;
-			}
+			};
 
-			action {
+			variant action {
 				id=0x14;
 				entity, action, jump_boost : varint;
-			}
+			};
 
-			steer {
+			variant steer {
 				id=0x15;
 				left, forward : float;
 				flags : ubyte;
-			}
+			};
 
-			animate {
+			variant animate {
 				id=0x1a;
 				hand : varint;
-			}
+			};
 
-			place_block {
+			variant place_block {
 				id=0x1c;
 				at : position;
 				face, hand : varint;
 				x, y, z : float;
-			}
+			};
 
-			use_item {
+			variant use_item {
 				id=0x1d;
 				hand : varint;
-			}
-		}
-	}
+			};
+		};
+	};
 
-	cb {
+	variant cb {
 		id : varint
 
-		player {
-			stats {
+		namespace player {
+			variant stats {
 				id=0x07;
 				data : array varint stat {
 					name : string;
 					value : varint;
 				};
-			}
+			};
 
-			vehicle_move {
+			variant vehicle_move {
 				id=0x29;
 				x, y, z : double;
 				yaw, pitch : float;
-			}
+			};
 
-			abilities {
+			variant abilities {
 				id=0x2b;
 				flags : byte;
 				fly, walk : float;
-			}
+			};
 
-			combat {
+			variant combat {
 				id=0x2c;
 				event : varint;
 
-				start {
+				variant start {
 					event=0;
-				}
+				};
 
-				end {
+				variant end {
 					event=1;
 					duration : varint;
 					entity : int;
-				}
+				};
 
-				dead {
+				variant dead {
 					event=2;
 					player : varint;
 					entity : int;
 					message : string;
-				}
-			}
+				};
+			};
 
-			cooldown {
+			variant cooldown {
 				id=0x17;
 				item, cooldown : varint;
-			}
+			};
 
-			game_state {
+			variant game_state {
 				id=0x1e;
 				reason : ubyte;
 				value : float;
-			}
+			};
 
-			teleport {
+			variant teleport {
 				id=0x2e;
 				x, y, z : double;
 				yaw, pitch : float;
 				flags : byte;
 				teleport : varint;
-			}
+			};
 
-			respawn {
+			variant respawn {
 				id=0x33;
 				dimension : int;
 				difficulty, gamemode : byte;
 				level_type : string;
-			}
+			};
 
-			camera {
+			variant camera {
 				id=0x36;
-				camera : varint;
-			}
+				target : varint;
+			};
 
-			health {
+			variant health {
 				id=0x3e;
 				health : float;
 				food : varint;
 				saturation : float;
-			}
-		}
+			};
+		};
 
-		world {
-			block_break {
+		namespace world {
+			variant block_break {
 				id=0x08;
 				at : position;
 				stage : byte;
-			}
+			};
 
-			update_tile {
+			variant update_tile {
 				id=0x09;
 				at : position;
 				tile : nbt;
-			}
+			};
 
-			block_action {
+			variant block_action {
 				id=0x0a;
 				action, param : ubyte;
 				block : varint;
-			}
+			};
 
-			update_block {
+			variant update_block {
 				id=0x0b;
 				at : position;
 				block : varint;
-			}
+			};
 
-			difficulty {
+			variant difficulty {
 				id=0x0d;
 				difficulty : ubyte;
-			}
+			};
 
-			update_blocks {
+			variant update_blocks {
 				id=0x10;
 				x, z : int;
 				records : array varint record {
@@ -328,17 +328,17 @@ play315 {
 					xz, y : ubyte;
 					block : varint;
 				};
-			}
+			};
 
-			named_sound {
+			variant named_sound {
 				id=0x19;
 				name : string;
 				category : int;
 				x, y, z : int;
 				volume, pitch : float;
-			}
+			};
 
-			explosion {
+			variant explosion {
 				id=0x1c;
 				x, y, z, r : float;
 				records : array int record {
@@ -347,41 +347,41 @@ play315 {
 
 				# applied to the player
 				vx, vy, vz : float;
-			}
+			};
 
-			unload_chunk {
+			variant unload_chunk {
 				id=0x1d;
 				x, z : int;
-			}
+			};
 
-			chunk {
+			variant chunk {
 				id=0x20;
 				x, z : int;
 				continuous : bool;
 				mask : varint;
 				data : bytes;
 				tiles : array varint nbt;
-			}
+			};
 
-			effect {
+			variant effect {
 				id=0x21;
 				effect : int;
 				at : position;
 				data : int;
 				global : bool;
-			}
+			};
 
-			particle {
+			variant particle {
 				id=0x22;
 				particle : int;
 				far : bool;
 				x, y, z, ox, oy, oz, data : float;
 				count : int;
 				data : bytes_eof;
-			}
+			};
 
-			entity {
-				spawn_object {
+			namespace entity {
+				variant spawn_object {
 					id=0x00;
 					entity : varint;
 					uuid : uuid;
@@ -390,23 +390,23 @@ play315 {
 					pitch, yaw : angle;
 					data : int;
 					vx, vy, vz : short;
-				}
+				};
 
-				spawn_orb {
+				variant spawn_orb {
 					id=0x01;
 					entity : varint;
 					x, y, z : double;
 					size : short;
-				}
+				};
 
-				spawn_global {
+				variant spawn_global {
 					id=0x02;
 					entity : varint;
 					kind : byte;
 					x, y, z : double;
-				}
+				};
 
-				spawn_mob {
+				variant spawn_mob {
 					id=0x03;
 					entity : varint;
 					uuid : uuid;
@@ -414,132 +414,131 @@ play315 {
 					x, y, z : double;
 					yaw, pitch, head_pitch : angle;
 					v_x, v_y, v_z : short;
-					metadata : metadata;
-				}
+					meta : metadata;
+				};
 
-				spawn_painting {
+				variant spawn_painting {
 					id=0x04;
 					entity : varint;
 					uuid : uuid;
 					title : string;
 					at : position;
 					direction : byte
-				}
+				};
 
-				spawn_player {
+				variant spawn_player {
 					id=0x05;
 					entity : varint;
 					uuid : uuid;
 					x, y, z : double;
 					yaw, pitch : angle;
-					metadata : metadata;
-				}
+					meta : metadata;
+				};
 
-				animate {
+				variant animate {
 					id=0x06;
 					entity : varint;
 					action : ubyte;
-				}
+				};
 
-				status {
+				variant status {
 					id=0x1b;
 					entity : int;
 					status : byte;
-				}
+				};
 
-				move {
+				variant move {
 					id=0x25;
 					entity : varint;
 					dx, dy, dz : short;
 					on_ground : bool;
-				}
+				};
 
-				look_move {
+				variant look_move {
 					id=0x26;
 					entity : varint;
 					dx, dy, dz : short;
 					yaw, pitch : angle;
 					on_ground : bool;
-				}
+				};
 
-				look {
+				variant look {
 					id=0x27;
 					entity : varint;
 					yaw, pitch : angle;
 					on_ground : bool;
-					
-				}
+				};
 
-				idle {
+				variant idle {
 					id=0x28;
 					entity : varint;
-				}
+				};
 
-				use_bed {
+				variant use_bed {
 					id=0x2f;
 					entity : varint;
 					at : position;
-				}
+				};
 
-				destroy {
+				variant destroy {
 					id=0x30;
 					entities : array varint varint;
-				}
+				};
 
-				remove_effect {
+				variant remove_effect {
 					id=0x31;
 					entity : varint;
 					effect : byte;
-				}
+				};
 
-				head_look {
+				variant head_look {
 					id=0x34;
 					entity : varint;
 					head_yaw : angle;
-				}
+				};
 
-				metadata {
+				variant meta {
 					id=0x39;
 					entity : varint;
-					metadata : metadata;
-				}
+					meta : metadata;
+				};
 
-				attach {
+				variant attach {
 					id=0x3a;
 					#fixme? better field names
 					entity, holding : int;
-				}
+				};
 
-				velocity {
+				variant velocity {
 					id=0x3b;
 					entity : varint;
 					vx, vy, vz : short;
-				}
+				};
 
-				equipment {
+				variant equipment {
 					id=0x3c;
-					entity, slot : varint;
+					entity, index : varint;
 					item : slot;
-				}
+				};
 
-				passengers {
+				variant passengers {
 					id=0x40;
 					passengers : array varint varint;
-				}
+				};
 
-				collect {
+				variant collect {
 					id=0x48;
 					entity, collector, count : varint;
-				}
+				};
 
-				teleport {
+				variant teleport {
 					id=0x49;
 					x, y, z : double;
 					yaw, pitch : angle;
 					on_ground : bool;
-				}
+				};
 
-				properties {
+				variant properties {
 					id=0x4a;
 					entity : varint;
 					properties : array int property {
@@ -551,197 +550,201 @@ play315 {
 							operation : byte;
 						};
 					};
-				}
+				};
 
-				effect {
+				variant effect {
 					id=0x4b;
 					effect, amplifier : byte;
 					duration : varint;
 					flags : byte;
-				}
-			}
+				};
+			};
 
-			border {
+			variant border {
 				id=0x35;
 				action : varint;
 
-				size {
+				variant size {
 					action=0;
 					diameter : double;
-				}
+				};
 
-				lerp {
+				variant lerp {
 					action=1;
 					old_diameter, new_diameter : double;
 					speed : varlong;
-				}
+				};
 
-				center {
+				variant center {
 					action=2;
 					x, z : double;
-				}
+				};
 
-				init {
+				variant init {
 					action=3;
 					x, z double;
 					old_diameter, new_diameter : double;
 					speed : varlong;
 					portal_boundary, warn_time, warn_size : varint;
-				}
+				};
 
-				warning_time {
+				variant warning_time {
 					action=4;
 					warn_time : varint;
-				}
+				};
 
-				warning_size {
+				variant warning_size {
 					action=5;
 					warn_size : varint;
-				}
-			}
+				};
+			};
 
-			compass_center {
+			variant compass_center {
 				id=0x43;
 				at : position;
-			}
+			};
 
-			time {
+			variant time {
 				id=0x44;
 				age, timeofday : long;
-			}
+			};
 
-			sound {
+			variant sound {
 				id=0x46;
 				sound, category : varint;
 				x, y, z : int;
 				volume, pitch : float;
-			}
-		}
+			};
+		};
 
-		gui {
-			boss_bar {
+		namespace gui {
+			variant boss_bar {
 				id=0x0c;
+				#FIXME reserved name
 				uuid : uuid;
 				action : varint;
 
-				create {
+				variant create {
 					action=0;
 					title : string;
 					health : float;
 					color, divisions : varint;
 					flags : ubyte;
-				}
+				};
 
-				remove {
+				variant remove {
 					action=1;
-				}
+				};
 
-				health {
+				variant health {
 					action=2;
 					health : float;
-				}
+				};
 
-				title {
+				variant title {
 					action=3;
 					title : string;
-				}
+				};
 
-				style {
+				variant style {
 					action=4;
 					color, divisions : varint;
-				}
+				};
 
-				flags {
+				variant flags {
 					action=5;
 					flags : ubyte;
-				}
-			}
+				};
+			};
 
-			tab {
+			variant tab {
 				id=0x0e;
 				matches : array varint string;
-			}
+			};
 
-			message {
+			variant message {
 				id=0x0f;
 				message : string;
+				#FIXME reserved name
 				position : ubyte;
-			}
+			};
 
-			edit_sign {
+			variant edit_sign {
 				id=0x2a;
 				at : position;
-			}
+			};
 
-			window {
-				transaction {
+			namespace window {
+				variant transaction {
 					id=0x11;
 					window : byte;
 					action : short;
 					accepted : bool;
-				}
+				};
 
-				close {
+				variant close {
 					id=0x12;
 					window : byte;
-				}
+				};
 
-				open {
+				variant open {
 					id=0x13;
 					window : byte;
 					kind, title : string;
 					size : ubyte;
-					horse {
+					variant horse {
 						kind="EntityHorse";
 						entity : int;
-					}
-				}
+					};
+				};
 
-				items {
+				variant items {
 					id=0x14;
 					window : byte;
 					items : array short slot;
-				}
+				};
 
-				property {
+				variant property {
 					id=0x15;
 					key, value : short;
-				}
+				};
 
-				update {
+				variant update {
 					id=0x16;
 					slot : short;
 					item : slot;
-				}
-			}
+				};
+			};
 
-			map {
+			variant map {
 				id=0x24;
 				map : varint;
 				scale : byte;
 				show_icons : bool;
 				icons : array varint icon {
+					#FIXME reserved name
 					type, x, z : ubyte;
 				};
 				columns : ubyte;
 
-				icons {
+				variant icons {
 					columns=0;
-				}
+				};
 
-				data {
+				variant data {
 					rows, x, z : ubyte;
 					data : bytes;
-				}
-			}
+				};
+			};
 
-			player_list {
+			variant player_list {
 				id=0x2d;
 				action : varint;
 
-				add {
+				variant add {
 					action=0;
 					items : array varint item {
+						#FIXME reserved name
 						uuid : uuid;
 						name : string;
 						properties : array varint property {
@@ -751,191 +754,195 @@ play315 {
 						gamemode, latency : varint;
 						display_name : bool_optional string;
 					};
-				}
+				};
 
-				gamemode {
+				variant gamemode {
 					action=1;
 					items : array varint item {
+						#FIXME reserved name
 						uuid : uuid;
 						gamemode : varint;
 					};
-				}
+				};
 
-				latency {
+				variant latency {
 					action=2;
 					items : array varint item {
+						#FIXME reserved name
 						uuid : uuid;
 						latency : varint;
 					};
-				}
+				};
 
-				display_name {
+				variant display_name {
 					action=3;
 					items : array varint item {
+						#FIXME reserved name
 						uuid : uuid;
 						display_name : bool_optional string;
 					};
-				}
+				};
 
-				remove {
+				variant remove {
 					action=4;
 					items : array varint uuid;
-				}
-			}
+				};
+			};
 
-			resource {
+			variant resource_pack {
 				id=0x32;
 				url, sha1 : string;
-			}
+			};
 
-			scoreboard {
-				display {
+			namespace scoreboard {
+				variant display {
 					id=0x38;
+					#FIXME reserved name
 					position : byte;
 					name : string;
-				}
+				};
 
-				objective {
+				variant objective {
 					id=0x3f;
 					name : string;
 					mode : byte;
 
-					create {
+					variant create {
 						mode=0;
 						value, kind : string;
-					}
+					};
 
-					remove {
+					variant remove {
 						mode=1;
-					}
+					};
 
-					update {
+					variant update {
 						mode=2;
 						value, kind : string;
-					}
-				}
+					};
+				};
 
-				score {
+				variant score {
 					id=0x42;
 					action : byte;
 
-					update {
+					variant update {
 						action=0;
 						name, objective : string;
 						value : varint;
-					}
+					};
 
-					remove {
+					variant remove {
 						action=1;
 						name, objective : string;
-					}
-				}
-			}
+					};
+				};
+			};
 
-			held_item {
+			variant held_item {
 				id=0x37;
-				slot : byte;
-			}
+				index : byte;
+			};
 
-			xp {
+			variant xp {
 				id=0x3d;
 				xp_bar : float;
 				level, total : varint;
-			}
+			};
 
-			team {
+			variant team {
 				id=0x41;
 				name : string;
 				mode : byte;
 
-				create {
+				variant create {
 					mode=0;
 					display, prefix, suffix : string;
 					flags : byte;
 					nametag_visibility, collision : string;
 					color : byte;
 					players : array varint string;
-				}
+				};
 
-				remove {
+				variant remove {
 					mode=1;
-				}
+				};
 
-				update {
+				variant update {
 					mode=2
 					display, prefix, suffix : string;
 					flags : byte;
 					nametag_visibility, collision : string;
 					color : byte;
-				}
+				};
 
-				add_players {
+				variant add_players {
 					mode=3;
 					players : array varint string;
-				}
+				};
 
-				remove_players {
+				variant remove_players {
 					mode=4;
 					players : array varint string;
-				}
-			}
+				};
+			};
 
-			title {
+			variant title {
 				id=0x45;
 				action : varint;
-				text {
+				variant text {
 					action=0;
 					text : string;
-				}
+				};
 
-				subtitle {
+				variant subtitle {
 					action=1;
 					text : string;
-				}
+				};
 
-				action_bar {
+				variant action_bar {
 					action=2;
 					text : string;
-				}
+				};
 
-				fade {
+				variant fade {
 					action=3;
 					fade_in, stay, fade_out : int;
-				}
+				};
 
-				hide {
+				variant hide {
 					action=4;
-				}
+				};
 
-				reset {
+				variant reset {
 					aciton=5;
-				}
-			}
+				};
+			};
 
-			player_list_text {
+			variant player_list_text {
 				id=0x47;
 				header, footer : string;
-			}
-		}
+			};
+		};
 
-		client {
-			plugin_message {
+		namespace client {
+			variant plugin_message {
 				id=0x18;
 				channel : string;
 				data : bytes_eof;
-			}
+			};
 
-			kick {
+			variant kick {
 				id=0x1a;
 				message : string;
-			}
+			};
 
-			keepalive {
+			variant keepalive {
 				id=0x1f;
 				timestamp : varint;
-			}
+			};
 
-			join_game {
+			variant join_game {
 				id=0x23;
 				entity : int;
 				gamemode : byte;
@@ -943,7 +950,8 @@ play315 {
 				difficulty, max_players : ubyte;
 				level_type : string;
 				reduced_debug : bool;
-			}
-		}
-	}
-}
+			};
+		};
+	};
+};
+
