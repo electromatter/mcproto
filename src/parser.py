@@ -1,7 +1,7 @@
 import re
 
 class ParserStack:
-	SPACES = re.compile(r'\s+')
+	SPACES = re.compile('\\s+')
 
 	def __init__(self, name, src=None):
 		if src is None:
@@ -13,10 +13,33 @@ class ParserStack:
 		self.loc = (1, 1)
 		self.stack = []
 
+	@property
+	def line(self):
+		return self.loc[0]
+
+	@property
+	def col(self):
+		return self.loc[1]
+
+	@property
+	def eof(self):
+		return self.off >= len(self.src)
+
+	def consume_match(self, pattern, skip_spaces=True):
+		match = self.match(pattern, skip_spaces)
+
+		if not match:
+			return None
+
+		self.consume(match)
+
+		return match.group(0)
+
 	def match(self, pattern, skip_spaces=True, as_str=False):
 		if skip_spaces:
 			self.consume(self.SPACES.match(self.src, self.off))
 
+		# if we don't have a compiled re, then it must be a pattern str
 		if not hasattr(pattern, 'match'):
 			pattern = re.compile(pattern)
 
@@ -49,6 +72,9 @@ class ParserStack:
 		else:
 			raise TypeError('must be a string, size, or match')
 
+		if not value:
+			return
+
 		# ensure value is a substring starting at self.off
 		if self.src.count(value, self.off, self.off + len(value)) != 1:
 			raise ValueError('value not found?')
@@ -66,12 +92,56 @@ class ParserStack:
 		self.loc = (self.loc[0] + lines, col)
 
 	def __enter__(self):
-		self.stack.push(self.off, self.loc)
+		self.stack.append((self.off, self.loc))
+		return self
 
 	def __exit__(self, exc_type, exc_value, traceback):
 		self.off, self.loc = self.stack.pop()
-#whitespace
-#identifier
-#keyword
-#parenthesis, braces
-#simicolon, colon, comma
+
+	def commit(self):
+		if not self.stack:
+			return
+		self.stack[-1] = (self.off, self.loc)
+
+class Parser:
+	SYMBOL = re.compile('[,:;(){}"\']')
+	WORD = re.compile('[0-9a-zA-Z_.]+')
+
+	def __init__(self, name, src=None):
+		self.stack = ParserStack(name, src)
+
+	def _string(self, quote='"', consume=False):
+		if hasattr(quote, 'group'):
+			quote = quote.group(0)
+
+		# build pattern
+		non_quote = '' if len(quote) <= 1 else '|' + re.escape(quote[1:])
+		pattern = re.compile('(\\\\.|[^\\\\%s]+%s)+' % (re.escape(quote[0]), non_quote))
+		quote = re.compile(re.escape(quote))
+
+		with self.stack as stack:
+			# match open quote
+			match = stack.match(quote)
+			if not match:
+				return None
+
+			value = match.group(0)
+			stack.consume(match)
+
+			while not stack.eof:
+				# match close quote
+				match = stack.match(quote)
+				if match:
+					value += match.group(0)
+					stack.consume(match)
+					if consume:
+						stack.commit()
+					return value
+
+				# match string body
+				match = stack.match(pattern)
+				if not match:
+					return None
+				value += match.group(0)
+				stack.consume(match)
+
