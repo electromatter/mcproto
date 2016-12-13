@@ -82,7 +82,6 @@ varint, varlong
 ubyte, byte, ushort, short, uint, int, ulong, long
 float, double
 angle, position
-uuid, uuid_string
 nbt, slot
 
 Parameterized:
@@ -93,4 +92,12 @@ bool_optional <elem type>
 signed <size>
 unsigned <size>
 array <size> <elem type>
-string <size> <encoding>
+
+#if string size is null, then the string is null terminated
+string <size or null> <encoding: utf8, utf16>
+
+bytes <size>
+uuid <encoding: bin, hex, ascii>
+
+#<size> takes: eof, <integer type>, <integer constant>
+
