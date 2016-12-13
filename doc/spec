@@ -61,6 +61,8 @@ type alias : typename;
 
 Typedefs can also define enumerations and flag-types
 
+Suppoerted enumeration types are: string and integer types
+
 #defines an enumeration type of varint
 type enumeration_name : enum varint {
 	#constraint predicates syntax is abused here
@@ -106,6 +108,6 @@ uuid <encoding: bin, hex, ascii>
 
 #<size> takes: eof, <integer type>, <integer constant>
 
-enum <base type>
-flag <base type>
+enum <base type> <enum def>
+flag <base type> <enum def>
 

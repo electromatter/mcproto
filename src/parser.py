@@ -1,3 +1,4 @@
+import collections
 import re
 
 class ParserStack:
@@ -37,6 +38,15 @@ class ParserStack:
 
 		return match.group(0)
 
+	def expect(self, pattern, skip_spaces=True, exception=None):
+		match = self.match(pattern, skip_spaces)
+		if not match:
+			if do_raise:
+				do_raise(pattern, self.name, self.loc)
+				return
+			raise ValueError('expected pattern {pattern!r} at {self.name}:{self.loc[0]} col {self.loc[1]}'.format(pattern=pattern, self=self))
+		return match
+
 	def match(self, pattern, skip_spaces=True, as_str=False):
 		if skip_spaces:
 			self.consume(self.SPACES.match(self.src, self.off))
@@ -55,7 +65,7 @@ class ParserStack:
 
 		return match
 
-	def consume(self, value):
+	def consume(self, value, do_raise=None):
 		if not value:
 			return
 
@@ -65,9 +75,12 @@ class ParserStack:
 		elif hasattr(value, '__int__'):
 			value = int(value)
 			if value < 0:
-				raise ValueError('consume negitive size?')
+				raise TypeError('consume got negitive argument')
 			if self.off + value > len(self.src):
-				raise ValueError('consume past end?')
+				if do_raise:
+					do_raise(value, self.name, self.loc)
+				#fall through intentional
+				raise ValueError('unexpected eof')
 			value = self.src[self.off:self.off + value]
 		elif hasattr(value, 'group'):
 			value = value.group(0)
@@ -79,7 +92,10 @@ class ParserStack:
 
 		# ensure value is a substring starting at self.off
 		if self.src.count(value, self.off, self.off + len(value)) != 1:
-			raise ValueError('value not found?')
+			if do_raise:
+				do_raise(self.name, self.loc)
+			#fall through intentional
+			raise ValueError('expected {value!r} at {self.name}:{self.loc[0]} col {self.loc[1]}'.format(value=value, self=self))
 
 		# compute the new offsets
 		off = len(value)
@@ -105,51 +121,70 @@ class ParserStack:
 			return
 		self.stack[-1] = (self.off, self.loc)
 
+class Namespace:
+	def __init__(self):
+		self.children = collections.OrderedDict()
+
+class StructNamespace(Namespace):
+	def __init__(self):
+		super().__init__()
+		self.fields = collections.OrderedDict()
+		self.order = []
+		self.constraints = []
+
 class MCProtoParser:
-	'parser for mcproto grammar LR(1)'
+	'parser for mcproto grammar'
 
 	SYMBOL = re.compile('[,:;(){}"\']')
 	WORD = re.compile('[0-9a-zA-Z_.]+')
 
+	SYMBOLS = set(',:;(){}"\'')
+	KEYWORDS = {'type', 'namespace', 'variant'}
+
 	def __init__(self, name, src=None):
 		self.stack = ParserStack(name, src)
 
-	def _string(self, quote='"', consume=False):
+	def _string(self, quote):
 		if hasattr(quote, 'group'):
 			quote = quote.group(0)
 
+		if len(quote) != 1:
+			raise ValueError('quote not a single character')
+
 		# build pattern
-		non_quote = '' if len(quote) <= 1 else '|' + re.escape(quote[1:])
-		pattern = re.compile('(\\\\.|[^\\\\%s]+%s)+' % (re.escape(quote[0]), non_quote))
+		pattern = re.compile('(\\\\.|[^\\\\%s]+)+' % re.escape(quote[0])
 		quote = re.compile(re.escape(quote))
 
-		with self.stack as stack:
-			# match open quote
+		# match open quote
+		match = stack.match(quote)
+		if not match:
+			return None
+
+		# take open quote
+		value = match.group(0)
+		stack.consume(match)
+
+		while not stack.eof:
+			# match close quote
 			match = stack.match(quote)
-			if not match:
-				return None
-
-			value = match.group(0)
-			stack.consume(match)
-
-			while not stack.eof:
-				# match close quote
-				match = stack.match(quote)
-				if match:
-					# we matched, consume and return
-					value += match.group(0)
-					stack.consume(match)
-					if consume:
-						stack.commit()
-					return value
-
-				# match string body
-				match = stack.match(pattern)
-				if not match:
-					return None
+			if match:
+				# we matched, consume and return
 				value += match.group(0)
 				stack.consume(match)
+				return value
 
-	def parse(self):
+			# match string body
+			match = stack.match(pattern)
+			if not match:
+				raise ValueError('does not match string body? at %s:%i col %i' % (stack.name, stack.line, stack.col))
+			value += match.group(0)
+			stack.consume(match)
+
+		raise ValueError('unexpected eof')
+
+	def typedef(self):
+		pass
+
+	def namespace_body(self, struct=False):
 		pass
 

@@ -1,0 +1,49 @@
+name         = ?? [a-zA-Z_][a-zA-Z0-9_.]* ??;
+number       = ?? 0x[0-9a-fA-F]+|0o[0-7]+|0b[01]+|[0-9]+ ??
+string_body  = ?? (\\.|[^"\\]+)+ ??
+string       = '"' string_body '"'
+
+value        = number
+             | string
+             | '{' body '}'
+             ;
+
+typeargs     = typespec typeargs
+             | typespec
+             ;
+
+typespec     = '(' typespec ')'
+             | '{' body '}'
+             | name typeargs
+             ;
+
+namespacedef = '{' body '}'
+             |
+             ;
+
+typedef      = '{' body '}'
+             | ':' typespec
+             |
+             ;
+
+names        = name ',' names
+             | name
+             ;
+
+values       = value ',' values
+             | value
+             ;
+
+constraint   = '(' constraint ')'
+             | name '=' value
+             ;
+
+body         = 'type' name typedef ';' body
+             | 'namespace' name namespacedef ';' body
+             | 'variant' name namespacedef ';' body
+             | names ':' typespec ';' body
+             | values ':' typespec ';' body
+             | constraint
+             |
+             ;
+
