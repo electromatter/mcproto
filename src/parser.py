@@ -1,6 +1,8 @@
 import re
 
 class ParserStack:
+	'lexer with a stack for arbitrary lookahead'
+
 	SPACES = re.compile('\\s+')
 
 	def __init__(self, name, src=None):
@@ -103,7 +105,9 @@ class ParserStack:
 			return
 		self.stack[-1] = (self.off, self.loc)
 
-class Parser:
+class MCProtoParser:
+	'parser for mcproto grammar LR(1)'
+
 	SYMBOL = re.compile('[,:;(){}"\']')
 	WORD = re.compile('[0-9a-zA-Z_.]+')
 
@@ -132,6 +136,7 @@ class Parser:
 				# match close quote
 				match = stack.match(quote)
 				if match:
+					# we matched, consume and return
 					value += match.group(0)
 					stack.consume(match)
 					if consume:
@@ -144,4 +149,7 @@ class Parser:
 					return None
 				value += match.group(0)
 				stack.consume(match)
+
+	def parse(self):
+		pass
 
