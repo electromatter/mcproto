@@ -21,7 +21,7 @@ namespace play315 {
 			variant plugin_message {
 				id=0x09;
 				channel : string;
-				message : bytes_eof;
+				message : bytes eof;
 			};
 
 			variant keep_alive {
@@ -375,7 +375,7 @@ namespace play315 {
 				far : bool;
 				x, y, z, ox, oy, oz, data : float;
 				count : int;
-				data : bytes_eof;
+				data : bytes eof;
 			};
 
 			namespace entity {
@@ -919,7 +919,7 @@ namespace play315 {
 			variant plugin_message {
 				id=0x18;
 				channel : string;
-				data : bytes_eof;
+				data : bytes eof;
 			};
 
 			variant kick {

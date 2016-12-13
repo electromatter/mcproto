@@ -71,7 +71,7 @@ namespace login {
 
 		variant success {
 			id=0x02;
-			player_uuid : uuid_string;
+			player_uuid : uuid ascii;
 			username : string;
 		}
 
