@@ -8,6 +8,8 @@ Underscores, dots, and case may be mangled depending on the target language.
 
 A namespace is a variant with no (specific) fields or constraints.
 
+#CURRENTLY UNSUPPORTED: named constants out side of an enum
+
 A specific field is
 
 type example {
@@ -49,6 +51,9 @@ type some_variant_with_constants {
 	# a constant varint
 	0x00 : varint;
 }; 
+
+Names can be forward declared as:
+type name;
 
 Typedefs (aliases) are defined as follows:
 
@@ -93,11 +98,14 @@ signed <size>
 unsigned <size>
 array <size> <elem type>
 
-#if string size is null, then the string is null terminated
-string <size or null> <encoding: utf8, utf16>
+#if string size is nul, then the string is terminated by a NUL character
+string <size or nul> <encoding: utf8, utf16>
 
 bytes <size>
 uuid <encoding: bin, hex, ascii>
 
 #<size> takes: eof, <integer type>, <integer constant>
+
+enum <base type>
+flag <base type>
 

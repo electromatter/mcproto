@@ -692,6 +692,8 @@ namespace play315 {
 						kind="EntityHorse";
 						entity : int;
 					};
+
+					variant;
 				};
 
 				variant items {
@@ -722,7 +724,7 @@ namespace play315 {
 				};
 				columns : ubyte;
 
-				variant icons {
+				variant {
 					columns=0;
 				};
 
