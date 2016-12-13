@@ -1,5 +1,5 @@
 namespace handshake {
-	variant sb {
+	type sb {
 		id : varint;
 		variant start {
 			id=0x00;
@@ -12,7 +12,7 @@ namespace handshake {
 }
 
 namespace status {
-	variant sb {
+	type sb {
 		id : varint;
 
 		variant request {
@@ -25,7 +25,7 @@ namespace status {
 		}
 	}
 
-	variant cb {
+	type cb {
 		id : varint;
 
 		variant response {
@@ -41,7 +41,7 @@ namespace status {
 }
 
 namespace login {
-	variant sb {
+	type sb {
 		id : varint;
 
 		variant start {
@@ -55,7 +55,7 @@ namespace login {
 		}
 	}
 
-	namespace cb {
+	type cb {
 		id : varint;
 
 		variant kick {

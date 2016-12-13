@@ -1,5 +1,5 @@
 namespace play315 {
-	variant sb {
+	type sb {
 		id : varint
 
 		namespace client {
@@ -58,7 +58,7 @@ namespace play315 {
 				variant click {
 					id=0x07;
 					window : byte;
-					slot : short;
+					index : short;
 					button : byte;
 					action : short;
 					mode : varint;
@@ -203,7 +203,7 @@ namespace play315 {
 		};
 	};
 
-	variant cb {
+	type cb {
 		id : varint
 
 		namespace player {
@@ -382,7 +382,7 @@ namespace play315 {
 				variant spawn_object {
 					id=0x00;
 					entity : varint;
-					uuid : uuid;
+					entity_uuid : uuid;
 					kind : byte;
 					x, y, z : double;
 					pitch, yaw : angle;
@@ -407,7 +407,7 @@ namespace play315 {
 				variant spawn_mob {
 					id=0x03;
 					entity : varint;
-					uuid : uuid;
+					entity_uuid : uuid;
 					kind : byte;
 					x, y, z : double;
 					yaw, pitch, head_pitch : angle;
@@ -418,7 +418,7 @@ namespace play315 {
 				variant spawn_painting {
 					id=0x04;
 					entity : varint;
-					uuid : uuid;
+					entity_uuid : uuid;
 					title : string;
 					at : position;
 					direction : byte
@@ -427,7 +427,7 @@ namespace play315 {
 				variant spawn_player {
 					id=0x05;
 					entity : varint;
-					uuid : uuid;
+					entity_uuid : uuid;
 					x, y, z : double;
 					yaw, pitch : angle;
 					meta : metadata;
@@ -543,7 +543,7 @@ namespace play315 {
 						key : string;
 						value : double;
 						modifiers : array varint modifier {
-							uuid : uuid;
+							modifier_uuid : uuid;
 							ammount : double;
 							operation : byte;
 						};
@@ -707,7 +707,7 @@ namespace play315 {
 
 				variant update {
 					id=0x16;
-					slot : short;
+					index : short;
 					item : slot;
 				};
 			};

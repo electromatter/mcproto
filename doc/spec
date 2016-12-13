@@ -1,0 +1,96 @@
+Names are case insensitive and the namespace seperater is .
+Underscores can be used to delimeter words in a name.
+However, the style is for all names to be lower case, except for constants
+which are uppercase.
+
+This is translated to the respective convention to each language.
+Underscores, dots, and case may be mangled depending on the target language.
+
+A namespace is a variant with no (specific) fields or constraints.
+
+A specific field is
+
+type example {
+	# thease are specific fields
+	field1, field2 : varint;
+};
+
+Variants can be nested, in which case, the inner variants inherit from their
+parent. They are branches of the parent.
+
+type parent {
+	some_branch_variable : varint;
+
+	variant branch1 {
+		#branch predicate (constraint)
+		some_branch_variable = 1;
+	};
+
+	variant branch3 {
+		some_branch_variable = 2;
+		branch_specific_field : varint;
+	};
+
+	variant branch2 {
+		#default branch
+	};
+};
+
+Supported branch types: integer, string.
+
+Branch predicates must be disjoint, otherwise, the first match takes
+precidence.
+
+Currently, only exact `=` is supported for branch predicates.
+
+Anonomyous constants may be defined as
+
+type some_variant_with_constants {
+	# a constant varint
+	0x00 : varint;
+}; 
+
+Typedefs (aliases) are defined as follows:
+
+type alias : typename;
+
+Typedefs can also define enumerations and flag-types
+
+#defines an enumeration type of varint
+type enumeration_name : enum varint {
+	#constraint predicates syntax is abused here
+	VALUE=1;
+	OTHER=2;
+	SEQ=3;
+	VALUES=4;
+	AFTER=5;
+};
+
+Example:
+
+# defines a type string4, an array of four strings.
+type string4 : array 4 string;
+
+Parentesis may be used to disambiguate template arguments:
+
+# defines an array prefixed with a signed 4-bit value
+array (signed 4) string;
+
+Builtin types:
+bool
+varint, varlong
+ubyte, byte, ushort, short, uint, int, ulong, long
+float, double
+angle, position
+uuid, uuid_string
+nbt, slot
+
+Parameterized:
+#really an alias of "array bool <elem type>"
+#that is: it is a zero/one length array
+bool_optional <elem type>
+
+signed <size>
+unsigned <size>
+array <size> <elem type>
+string <size> <encoding>

@@ -41,7 +41,7 @@ namespace name {
 #some invalid syntax for testing:
 	"test }"
 	
-	variant other_name {
+	type other_name {
 		field : varint;
 	};
 };
