@@ -209,7 +209,7 @@ namespace play315 {
 		namespace player {
 			variant stats {
 				id=0x07;
-				data : array varint stat {
+				data : array varint {
 					name : string;
 					value : varint;
 				};
@@ -321,7 +321,7 @@ namespace play315 {
 			variant update_blocks {
 				id=0x10;
 				x, z : int;
-				records : array varint record {
+				records : array varint {
 					# xz IS INTENTIONAL
 					xz, y : ubyte;
 					block : varint;
@@ -339,7 +339,7 @@ namespace play315 {
 			variant explosion {
 				id=0x1c;
 				x, y, z, r : float;
-				records : array int record {
+				records : array int {
 					x, y, z : byte;
 				};
 
@@ -539,10 +539,10 @@ namespace play315 {
 				variant properties {
 					id=0x4a;
 					entity : varint;
-					properties : array int property {
+					properties : array int {
 						key : string;
 						value : double;
-						modifiers : array varint modifier {
+						modifiers : array varint {
 							modifier_uuid : uuid;
 							ammount : double;
 							operation : byte;
@@ -717,7 +717,7 @@ namespace play315 {
 				map : varint;
 				scale : byte;
 				show_icons : bool;
-				icons : array varint icon {
+				icons : array varint {
 					icon_type, x, z : ubyte;
 				};
 				columns : ubyte;
@@ -738,10 +738,10 @@ namespace play315 {
 
 				variant add {
 					action=0;
-					items : array varint item {
+					items : array varint {
 						player_uuid : uuid;
 						name : string;
-						properties : array varint property {
+						properties : array varint {
 							name, value : string;
 							signature : bool_optional string;
 						}
@@ -752,7 +752,7 @@ namespace play315 {
 
 				variant gamemode {
 					action=1;
-					items : array varint item {
+					items : array varint {
 						player_uuid : uuid;
 						gamemode : varint;
 					};
@@ -760,7 +760,7 @@ namespace play315 {
 
 				variant latency {
 					action=2;
-					items : array varint item {
+					items : array varint {
 						player_uuid : uuid;
 						latency : varint;
 					};
@@ -768,7 +768,7 @@ namespace play315 {
 
 				variant display_name {
 					action=3;
-					items : array varint item {
+					items : array varint {
 						player_uuid : uuid;
 						display_name : bool_optional string;
 					};
