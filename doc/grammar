@@ -26,10 +26,10 @@ name         = identifier '.' name
              | identifier;
 
 value        = number
-             | string
-             | '{' body '}';
+             | string;
 
-typeargs     = typespec typeargs
+typeargs     = value typeargs
+             | typespec typeargs
              |;
 
 typespec     = '(' typespec ')'
