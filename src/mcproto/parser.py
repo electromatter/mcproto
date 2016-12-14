@@ -1,9 +1,20 @@
-import ast
 import re
 
-__all__ = ['parse', 'Node', 'Value', 'Number', 'String', 'Identifier',
-		'Body', 'TypeSpec', 'TypeDef', 'VariantDef', 'NamespaceDef',
-		'ConstraintDef', 'FieldDef']
+from .ast import *
+
+__all__ = ['parse']
+
+def make_value(value):
+	if not isinstance(value, str):
+		raise TypeError('expected value as a token')
+
+	if len(value) == 0:
+		raise ValueError('value too short')
+
+	if value[0] in '-0123456789':
+		return Number(token=value)
+	else:
+		return String(token=value)
 
 class MCProtoLexer:
 	def __init__(self, name, src=None, no_match=None):
@@ -39,13 +50,26 @@ class MCProtoLexer:
 	def __iter__(self):
 		return self
 
-	def __next__(self):
-		if self.eof:
-			self._token = None
-			raise StopIteration
+	def _consume(self):
+		if self._token is None:
+			return
 
+		lines = self._token.count('\n')
+		cols = len(self._token)
+
+		col = 0 if lines > 0 else self.col_offset + cols
+
+		self.loc = (self.off + cols, self.lineno + lines, col)
+
+		self._token = None
+
+	def __next__(self):
 		while True:
-			self._token = None
+			self._consume()
+
+			if self.eof:
+				raise StopIteration
+
 			match = self.TOKEN.match(self.src, self.off)
 
 			if not match:
@@ -54,13 +78,6 @@ class MCProtoLexer:
 				raise StopIteration
 
 			token = self._token = match.group(0)
-
-			lines = token.count('\n')
-			cols = len(token)
-
-			col = 1 if lines > 0 else self.col + cols
-
-			self.loc = (self.off + cols, self.line + lines, col)
 
 			if token.startswith('#') or token.isspace():
 				continue
@@ -102,16 +119,16 @@ class MCProtoLexer:
 		return self.loc[0]
 
 	@property
-	def line(self):
+	def lineno(self):
 		return self.loc[1]
 
 	@property
-	def col(self):
+	def col_offset(self):
 		return self.loc[2]
 
 	@property
 	def pos(self):
-		return '%s:%i col %i' % (self.name, self.line, self.col)
+		return '{.name}:{.lineno} col {.col_offset}'.format(self)
 
 	@property
 	def eof(self):
@@ -128,7 +145,7 @@ class MCProtoLexer:
 	def is_symbol(self):
 		return self.token in self.SYMBOLS
 
-	def is_identifier(self):
+	def is_ident(self):
 		return not (self.token is None
 				or self.is_constant() \
 				or self.is_keyword() \
@@ -141,7 +158,7 @@ class MCProtoParser:
 		self.lex = lex
 
 	def identifier(self):
-		if not self.lex.is_identifier():
+		if not self.lex.is_ident():
 			return None
 		name = self.lex.token
 		self.lex.expect(name)
@@ -168,7 +185,8 @@ class MCProtoParser:
 
 			name = self.identifier()
 			if name is None:
-				raise ValueError('expected identifier at %s' % self.lex.pos)
+				raise ValueError('expected identifier at %s' \
+							% self.lex.pos)
 
 		return Identifier('.'.join(path))
 
@@ -187,7 +205,7 @@ class MCProtoParser:
 				self.lex.expect('}')
 				if len(args) == 1:
 					return args[0]
-			elif self.lex.is_identifier():
+			elif self.lex.is_ident():
 				args.append(self.name())
 			elif self.lex.is_constant():
 				args.append(self.value())
@@ -215,7 +233,8 @@ class MCProtoParser:
 		name = self.identifier()
 		body = None
 		if name is None:
-			raise ValueError('namespace expected name at %s' % self.lex.pos)
+			raise ValueError('namespace expected name at %s' \
+						% self.lex.pos)
 		if self.lex.accept('{'):
 			body = self.body()
 			self.lex.accept('}')
@@ -226,7 +245,8 @@ class MCProtoParser:
 			return None
 		name = self.identifier()
 		if name is None:
-			raise ValueError('type expected name at %s' % self.lex.pos)
+			raise ValueError('type expected name at %s' \
+						% self.lex.pos)
 		if self.lex.token in '{:':
 			self.lex.accept(':')
 			spec = self.typespec()
@@ -236,7 +256,7 @@ class MCProtoParser:
 
 	def field_or_constraint(self):
 		# get the first part of the definition
-		if self.lex.is_identifier():
+		if self.lex.is_ident():
 			name = self.name()
 		elif self.lex.is_constant():
 			name = self.value()
@@ -246,16 +266,18 @@ class MCProtoParser:
 		# if we are a constraint
 		if self.lex.token == '=':
 			self.lex.expect('=')
-			if self.lex.is_identifier():
+			if self.lex.is_ident():
 				val = self.name()
 			elif self.lex.is_constant():
 				val = self.value()
 			else:
-				raise ValueError('constraint expected name or value at %s' % self.lex.pos)
+				raise ValueError('value expected at %s' \
+							% self.lex.pos)
 			return ConstraintDef(name, val)
 
 		if '.' in name.name:
-			raise ValueError('field must have local name at %s' % self.lex.pos)
+			raise ValueError('field must have local name at %s' \
+							% self.lex.pos)
 
 		names = [name]
 		while True:
@@ -265,9 +287,11 @@ class MCProtoParser:
 			elif self.lex.token == ',':
 				self.lex.expect(',')
 			else:
-				raise ValueError('field expected , or : at %s' % self.lex.pos)
-			if not self.lex.is_identifier():
-				raise ValueError('expected field name at %s' % self.lex.pos)
+				raise ValueError('field expected type at %s' \
+							% self.lex.pos)
+			if not self.lex.is_ident():
+				raise ValueError('expected field name at %s' \
+							% self.lex.pos)
 			names.append(self.identifier())
 
 		field_type = self.typespec()
@@ -283,7 +307,7 @@ class MCProtoParser:
 				val = self.namespacedef()
 			elif self.lex.token == 'type':
 				val = self.typedef()
-			elif self.lex.is_constant() or self.lex.is_identifier():
+			elif self.lex.is_constant() or self.lex.is_ident():
 				val = self.field_or_constraint()
 			else:
 				break
@@ -293,134 +317,4 @@ class MCProtoParser:
 
 def parse(name, src=None):
 	return MCProtoParser(name, src).body()
-
-def make_value(value):
-	if not isinstance(value, str):
-		raise TypeError('expected value as a token')
-
-	if len(value) == 0:
-		raise ValueError('value too short')
-
-	if value[0] in '-0123456789':
-		return Number(token=value)
-	else:
-		return String(token=value)
-
-def make_name(name):
-	if isinstance(name, Identifier):
-		return name
-	elif isinstance(name, str) or hasattr(name, '__str__'):
-		return Identifier(str(name))
-	else:
-		raise TypeError('name must be a string')
-
-class Node:
-	pass
-
-class Identifier(Node):
-	def __init__(self, name):
-		self.name = name
-
-	def __repr__(self):
-		return 'Identififer(%r)' % self.name
-
-	def __str__(self):
-		return self.value
-
-class Value(Node):
-	pass
-
-class Number(Value):
-	def __init__(self, value=None, token=None):
-		if value is None and token is None:
-			raise ValueError('no value specified')
-
-		if token is None:
-			token = str(value)
-
-		self.value = ast.literal_eval(token)
-		self.token = token
-
-		if not isinstance(self.value, int):
-			raise ValueError('token was not an integer')
-
-	def __repr__(self):
-		return 'Number(%r)' % self.value
-
-	def __int__(self):
-		return self.value
-
-class String(Value):
-	def __init__(self, value=None, token=None):
-		if value is None and token is None:
-			raise ValueError('no value specified')
-
-		if token is None:
-			token = str(value)
-
-		self.value = ast.literal_eval(token)
-		self.token = token
-
-		if not isinstance(self.value, str):
-			raise ValueError('token was not a string')
-
-	def __repr__(self):
-		return 'String(%r)' % self.value
-
-	def __str__(self):
-		return self.value
-
-class Body(Node):
-	def __init__(self, children):
-		self.children = children
-
-	def __repr__(self):
-		return 'Body(%r)' % self.children
-
-class TypeSpec(Node):
-	def __init__(self, args):
-		self.args = args
-
-	def __repr__(self):
-		return 'TypeSpec(%r)' % self.args
-
-class TypeDef(Node):
-	def __init__(self, name, spec=None):
-		self.name = make_name(name)
-		self.spec = spec
-
-	def __repr__(self):
-		return 'TypeDef(%r, %r)' % (self.name, self.spec)
-
-class VariantDef(Node):
-	def __init__(self, name=None, body=None):
-		self.name = make_name(name)
-		self.body = body
-
-	def __repr__(self):
-		return 'VariantDef(%r, %r)' % (self.name, self.body)
-
-class NamespaceDef(Node):
-	def __init__(self, name, body=None):
-		self.name = make_name(name)
-		self.body = body
-
-	def __repr__(self):
-		return 'NamespaceDef(%r, %r)' % (self.name, self.body)
-
-class ConstraintDef(Node):
-	def __init__(self, left, right):
-		self.left = left
-		self.right = right
-
-	def __repr__(self):
-		return 'ConstraintDef(%r, %r)' % (self.left, self.right)
-
-class FieldDef(Node):
-	def __init__(self, names, field_type):
-		self.names = [make_name(name) for name in names]
-		self.field_type = field_type
-
-	def __repr__(self):
-		return 'FieldDef(%r, %r)' % (self.names, self.field_type)
 
