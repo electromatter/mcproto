@@ -7,9 +7,9 @@ namespace handshake {
 			address : string;
 			port : ushort;
 			target : varint;
-		}
-	}
-}
+		};
+	};
+};
 
 namespace status {
 	type sb {
@@ -22,23 +22,23 @@ namespace status {
 		variant ping {
 			id=0x01;
 			timestamp : long;
-		}
-	}
+		};
+	};
 
 	type cb {
 		id : varint;
 
 		variant response {
-			id=0x00
+			id=0x00;
 			status : string;
-		}
+		};
 
 		variant pong {
 			id = 0x01;
 			timestamp : long;
-		}
-	}
-}
+		};
+	};
+};
 
 namespace login {
 	type sb {
@@ -47,13 +47,13 @@ namespace login {
 		variant start {
 			id=0x00;
 			username : string;
-		}
+		};
 
 		variant response {
 			id=0x01;
 			secret, token : bytes;
-		}
-	}
+		};
+	};
 
 	type cb {
 		id : varint;
@@ -61,23 +61,23 @@ namespace login {
 		variant kick {
 			id=0x00;
 			reason : string;
-		}
+		};
 
 		variant request {
 			id=0x01;
 			server_id : string;
 			pubkey, token : bytes;
-		}
+		};
 
 		variant success {
 			id=0x02;
 			player_uuid : uuid ascii;
 			username : string;
-		}
+		};
 
 		variant compression {
 			id=0x03;
 			threshold : varint;
-		}
-	}
-}
+		};
+	};
+};

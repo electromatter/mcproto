@@ -1,6 +1,6 @@
 namespace play315 {
 	type sb {
-		id : varint
+		id : varint;
 
 		namespace client {
 			variant status {
@@ -204,7 +204,7 @@ namespace play315 {
 	};
 
 	type cb {
-		id : varint
+		id : varint;
 
 		namespace player {
 			variant stats {
@@ -421,7 +421,7 @@ namespace play315 {
 					entity_uuid : uuid;
 					title : string;
 					at : position;
-					direction : byte
+					direction : byte;
 				};
 
 				variant spawn_player {
@@ -580,7 +580,7 @@ namespace play315 {
 
 				variant init {
 					action=3;
-					x, z double;
+					x, z : double;
 					old_diameter, new_diameter : double;
 					speed : varlong;
 					portal_boundary, warn_time, warn_size : varint;
@@ -746,7 +746,7 @@ namespace play315 {
 						properties : array varint {
 							name, value : string;
 							signature : bool_optional string;
-						}
+						};
 						gamemode, latency : varint;
 						display_name : bool_optional string;
 					};
@@ -861,7 +861,7 @@ namespace play315 {
 				};
 
 				variant update {
-					mode=2
+					mode=2;
 					display, prefix, suffix : string;
 					flags : byte;
 					nametag_visibility, collision : string;

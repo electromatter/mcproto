@@ -30,7 +30,7 @@ value        = number
              | '{' body '}';
 
 typeargs     = typespec typeargs
-             | typespec;
+             |;
 
 typespec     = '(' typespec ')'
              | '{' body '}'
@@ -38,6 +38,7 @@ typespec     = '(' typespec ')'
 
 variantdef   = 'variant' identifier '{' body '}'
              | 'variant' identifier
+             | 'variant' '{' body '}'
              | 'variant';
 
 namespacedef = 'namespace' identifier '{' body '}'
@@ -50,16 +51,12 @@ typedef      = 'type' identifier '{' body '}'
 names        = name ',' names
              | name;
 
-values       = value ',' values
-             | value;
-
 constraint   = name '=' value;
 
 body         = typedef ';' body
              | namespacedef ';' body
              | variantdef ';' body
              | names ':' typespec ';' body
-             | values ':' typespec ';' body
              | constraint ';' body
              |;
 
