@@ -1,5 +1,5 @@
 (* comments *)
-#.+$
+#[^\n]+\n
 
 (* keywords *)
 type
@@ -20,9 +20,6 @@ variant
 
 (* whitespace *)
 [ \t\n\f]+
-
-(* ignore unrecognized *)
-.
 
 (* grammar *)
 name         = identifier '.' name
