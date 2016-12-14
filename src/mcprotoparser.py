@@ -152,8 +152,7 @@ class MCProtoParser:
 			return None
 		tok = self.lex.token
 		self.lex.expect(tok)
-		val = make_value(tok)
-		return tok
+		return make_value(tok)
 
 	def name(self):
 		path = []
