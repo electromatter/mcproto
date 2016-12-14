@@ -1,0 +1,6 @@
+passes:
+ 1) parse into ast
+ 2) typecheck
+ 3) construct parsers/generators
+ 4) generate target code
+

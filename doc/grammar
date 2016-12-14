@@ -1,49 +1,68 @@
-name         = ?? [a-zA-Z_][a-zA-Z0-9_.]* ??;
-number       = ?? 0x[0-9a-fA-F]+|0o[0-7]+|0b[01]+|[0-9]+ ??
-string_body  = ?? (\\.|[^"\\]+)+ ??
-string       = '"' string_body '"'
+(* comments *)
+#.+$
+
+(* keywords *)
+type
+namespace
+variant
+
+(* symbols *)
+[{}();:,=\.]
+
+(* strings *)
+"(\\.|[^\\"])*"
+
+(* numbers *)
+-?(0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|[0-9]+)
+
+(* identifier *)
+[a-zA-Z_][0-9a-zA-Z_]*
+
+(* whitespace *)
+[ \t\n\f]+
+
+(* ignore unrecognized *)
+.
+
+(* grammar *)
+name         = identifier '.' name
+             | identifier;
 
 value        = number
              | string
-             | '{' body '}'
-             ;
+             | '{' body '}';
 
 typeargs     = typespec typeargs
-             | typespec
-             ;
+             | typespec;
 
 typespec     = '(' typespec ')'
              | '{' body '}'
-             | name typeargs
-             ;
+             | name typeargs;
 
-namespacedef = '{' body '}'
-             |
-             ;
+variantdef   = 'variant' identifier '{' body '}'
+             | 'variant' identifier
+             | 'variant';
 
-typedef      = '{' body '}'
-             | ':' typespec
-             |
-             ;
+namespacedef = 'namespace' identifier '{' body '}'
+             | 'namespace' identifier;
+
+typedef      = 'type' identifier '{' body '}'
+             | 'type' identifier ':' typespec
+             | 'type' identifier;
 
 names        = name ',' names
-             | name
-             ;
+             | name;
 
 values       = value ',' values
-             | value
-             ;
+             | value;
 
-constraint   = '(' constraint ')'
-             | name '=' value
-             ;
+constraint   = name '=' value;
 
-body         = 'type' name typedef ';' body
-             | 'namespace' name namespacedef ';' body
-             | 'variant' name namespacedef ';' body
+body         = typedef ';' body
+             | namespacedef ';' body
+             | variantdef ';' body
              | names ':' typespec ';' body
              | values ':' typespec ';' body
-             | constraint
-             |
-             ;
+             | constraint ';' body
+             |;
 
