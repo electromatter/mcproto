@@ -51,7 +51,10 @@ typedef      = 'type' identifier '{' body '}'
 names        = name ',' names
              | name;
 
-constraint   = name '=' value;
+lrval        = name
+             | value;
+
+constraint   = lrval '=' lrval;
 
 body         = typedef ';' body
              | namespacedef ';' body
