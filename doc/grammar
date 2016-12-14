@@ -1,5 +1,5 @@
 (* comments *)
-#[^\n]+\n
+#[^\n]+
 
 (* keywords *)
 type
