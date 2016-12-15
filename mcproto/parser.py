@@ -327,14 +327,14 @@ class MCProtoParser:
 				statements.append(self.namespacedef())
 			elif self.lex.token == 'type':
 				statements.append(self.typedef())
-			elif self.lex.token == ';':
-				pass
 			elif self.lex.is_constant() or self.lex.is_ident():
 				statements.append(self.field_or_constraint())
+			elif self.lex.token == ';':
+				pass
 			else:
 				break
 			self.lex.expect(';')
-		return Body(statements, **pos)
+		return statements
 
 def parse(name, src=None):
 	return MCProtoParser(name, src).body()

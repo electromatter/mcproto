@@ -2,9 +2,8 @@ import ast
 
 __all__ = ['Node', 'Identifier',
 		'Value', 'Number', 'String',
-		'Body', 'TypeSpec',
-		'TypeDef', 'VariantDef', 'NamespaceDef',
-		'ConstraintDef', 'FieldDef']
+		'TypeSpec', 'TypeDef',
+		'VariantDef', 'NamespaceDef', 'ConstraintDef', 'FieldDef']
 
 class Node:
 	_fields = ()
@@ -69,16 +68,6 @@ class String(Value):
 
 	def __str__(self):
 		return self.value
-
-class Body(Node):
-	_fields = ('body', )
-
-	def __init__(self, body=None, **kwargs):
-		super().__init__(**kwargs)
-		self.body = body
-
-	def __repr__(self):
-		return 'Body(%r)' % self.body
 
 class TypeSpec(Node):
 	_fields = ('args', )
