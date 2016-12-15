@@ -9,32 +9,41 @@ __all__ = ['Node', 'Identifier',
 class Node:
 	_fields = ()
 
+	def __init__(self, **kwargs):
+		self.lineno = kwargs.get('lineno', None)
+		self.col_offset = kwargs.get('col_offset', None)
+
 class Identifier(Node):
-	def __init__(self, name):
+	def __init__(self, name=None, **kwargs):
+		super().__init__(**kwargs)
 		self.name = name
 
 	def __repr__(self):
 		return 'Identififer(%r)' % self.name
 
 	def __str__(self):
-		return self.value
+		return self.name
 
 class Value(Node):
-	pass
+	_type=None
 
-class Number(Value):
-	def __init__(self, value=None, token=None):
-		if value is None and token is None:
-			raise ValueError('no value specified')
+	def __init__(self, value=None, token=None, **kwargs):
+		super().__init__(**kwargs)
 
-		if token is None:
-			token = str(value)
+		if token is not None and value is None:
+			value = ast.literal_eval(token)
 
-		self.value = ast.literal_eval(token)
+			if self._type and not isinstance(value, self._type):
+				raise ValueError('token wrong type?')
+
+		self.value = value
 		self.token = token
 
-		if not isinstance(self.value, int):
-			raise ValueError('token was not an integer')
+class Number(Value):
+	_type=int
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, _type=int, **kwargs)
 
 	def __repr__(self):
 		return 'Number(%r)' % self.value
@@ -43,18 +52,10 @@ class Number(Value):
 		return self.value
 
 class String(Value):
-	def __init__(self, value=None, token=None):
-		if value is None and token is None:
-			raise ValueError('no value specified')
+	_type=str
 
-		if token is None:
-			token = str(value)
-
-		self.value = ast.literal_eval(token)
-		self.token = token
-
-		if not isinstance(self.value, str):
-			raise ValueError('token was not a string')
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, _type=str, **kwargs)
 
 	def __repr__(self):
 		return 'String(%r)' % self.value
@@ -63,18 +64,20 @@ class String(Value):
 		return self.value
 
 class Body(Node):
-	_fields = ('children', )
+	_fields = ('body', )
 
-	def __init__(self, children):
-		self.children = children
+	def __init__(self, body=None, **kwargs):
+		super().__init__(**kwargs)
+		self.body = body
 
 	def __repr__(self):
-		return 'Body(%r)' % self.children
+		return 'Body(%r)' % self.body
 
 class TypeSpec(Node):
 	_fields = ('args', )
 
-	def __init__(self, args):
+	def __init__(self, args=None, **kwargs):
+		super().__init__(**kwargs)
 		self.args = args
 
 	def __repr__(self):
@@ -83,7 +86,8 @@ class TypeSpec(Node):
 class TypeDef(Node):
 	_fields = ('name', 'spec')
 
-	def __init__(self, name, spec=None):
+	def __init__(self, name=None, spec=None, **kwargs):
+		super().__init__(**kwargs)
 		self.name = name
 		self.spec = spec
 
@@ -93,7 +97,8 @@ class TypeDef(Node):
 class VariantDef(Node):
 	_fields = ('name', 'body')
 
-	def __init__(self, name=None, body=None):
+	def __init__(self, name=None, body=None, **kwargs):
+		super().__init__(**kwargs)
 		self.name = name
 		self.body = body
 
@@ -103,7 +108,8 @@ class VariantDef(Node):
 class NamespaceDef(Node):
 	_fields = ('name', 'body')
 
-	def __init__(self, name, body=None):
+	def __init__(self, name=None, body=None, **kwargs):
+		super().__init__(**kwargs)
 		self.name = name
 		self.body = body
 
@@ -113,7 +119,8 @@ class NamespaceDef(Node):
 class ConstraintDef(Node):
 	_fields = ('left', 'right')
 
-	def __init__(self, left, right):
+	def __init__(self, left=None, right=None, **kwargs):
+		super().__init__(**kwargs)
 		self.left = left
 		self.right = right
 
@@ -123,7 +130,8 @@ class ConstraintDef(Node):
 class FieldDef(Node):
 	_fields = ('names', 'field_type')
 
-	def __init__(self, names, field_type):
+	def __init__(self, names=None, field_type=None, **kwargs):
+		super().__init__(**kwargs)
 		self.names = names
 		self.field_type = field_type
 

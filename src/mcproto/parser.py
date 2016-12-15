@@ -4,7 +4,7 @@ from .ast import *
 
 __all__ = ['parse']
 
-def make_value(value):
+def make_value(value, **kwargs):
 	if not isinstance(value, str):
 		raise TypeError('expected value as a token')
 
@@ -12,9 +12,9 @@ def make_value(value):
 		raise ValueError('value too short')
 
 	if value[0] in '-0123456789':
-		return Number(token=value)
+		return Number(token=value, **kwargs)
 	else:
-		return String(token=value)
+		return String(token=value, **kwargs)
 
 class MCProtoLexer:
 	def __init__(self, name, src=None, no_match=None):
@@ -22,7 +22,7 @@ class MCProtoLexer:
 			src = open(name, 'r').read()
 		self.name = name
 		self.src = src
-		self.loc = (0, 1, 1)
+		self.loc = (0, 1, 0)
 		self.no_match = no_match
 		self._token = None
 
@@ -157,23 +157,35 @@ class MCProtoParser:
 			lex = MCProtoLexer(name, src)
 		self.lex = lex
 
+	@property
+	def pos(self):
+		return {'lineno': self.lex.lineno, \
+			'col_offset': self.lex.col_offset}
+
+	@property
+	def col_offset(self):
+		return self.lex.col_offset
+
 	def identifier(self):
 		if not self.lex.is_ident():
 			return None
+		pos = self.pos
 		name = self.lex.token
 		self.lex.expect(name)
-		return Identifier(name)
+		return Identifier(name, **pos)
 
 	def value(self):
 		if not self.lex.is_constant():
 			return None
+		pos = self.pos
 		tok = self.lex.token
 		self.lex.expect(tok)
-		return make_value(tok)
+		return make_value(tok, **pos)
 
 	def name(self):
 		path = []
 
+		pos = self.pos
 		name = self.identifier()
 		if name is None:
 			return None
@@ -188,9 +200,10 @@ class MCProtoParser:
 				raise ValueError('expected identifier at %s' \
 							% self.lex.pos)
 
-		return Identifier('.'.join(path))
+		return Identifier('.'.join(path), **pos)
 
 	def typespec(self):
+		pos = self.pos
 		args = []
 		while True:
 			if self.lex.token == '(':
@@ -215,9 +228,10 @@ class MCProtoParser:
 		if not args:
 			return None
 
-		return TypeSpec(args)
+		return TypeSpec(args, **pos)
 
 	def variantdef(self):
+		pos = self.pos
 		if not self.lex.accept('variant'):
 			return None
 		name = self.identifier()
@@ -225,9 +239,10 @@ class MCProtoParser:
 		if self.lex.accept('{'):
 			body = self.body()
 			self.lex.accept('}')
-		return VariantDef(name, body)
+		return VariantDef(name, body, **pos)
 
 	def namespacedef(self):
+		pos = self.pos
 		if not self.lex.accept('namespace'):
 			return None
 		name = self.identifier()
@@ -238,9 +253,10 @@ class MCProtoParser:
 		if self.lex.accept('{'):
 			body = self.body()
 			self.lex.accept('}')
-		return NamespaceDef(name, body)
+		return NamespaceDef(name, body, **pos)
 
 	def typedef(self):
+		pos = self.pos
 		if not self.lex.accept('type'):
 			return None
 		name = self.identifier()
@@ -250,11 +266,13 @@ class MCProtoParser:
 		if self.lex.token in '{:':
 			self.lex.accept(':')
 			spec = self.typespec()
-			return TypeDef(name, spec)
+			return TypeDef(name, spec, **pos)
 		else:
-			return TypeDef(name)
+			return TypeDef(name, **pos)
 
 	def field_or_constraint(self):
+		pos = self.pos
+
 		# get the first part of the definition
 		if self.lex.is_ident():
 			name = self.name()
@@ -273,7 +291,7 @@ class MCProtoParser:
 			else:
 				raise ValueError('value expected at %s' \
 							% self.lex.pos)
-			return ConstraintDef(name, val)
+			return ConstraintDef(name, val, **pos)
 
 		if '.' in name.name:
 			raise ValueError('field must have local name at %s' \
@@ -296,9 +314,10 @@ class MCProtoParser:
 
 		field_type = self.typespec()
 
-		return FieldDef(names, field_type)
+		return FieldDef(names, field_type, **pos)
 
 	def body(self):
+		pos = self.pos
 		statements = []
 		while True:
 			if self.lex.token == 'variant':
@@ -313,7 +332,7 @@ class MCProtoParser:
 				break
 			statements.append(val)
 			self.lex.expect(';')
-		return Body(statements)
+		return Body(statements, **pos)
 
 def parse(name, src=None):
 	return MCProtoParser(name, src).body()
