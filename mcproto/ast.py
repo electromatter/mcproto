@@ -10,8 +10,15 @@ class Node:
 	_fields = ()
 
 	def __init__(self, **kwargs):
+		self._srcname = kwargs.get('_srcname', None)
 		self.lineno = kwargs.get('lineno', None)
 		self.col_offset = kwargs.get('col_offset', None)
+
+	@property
+	def pos(self):
+		return '%s:%i col %i' % (self.srcname, \
+					 self.lineno, \
+					 self.col_offset)
 
 class Identifier(Node):
 	def __init__(self, name=None, **kwargs):

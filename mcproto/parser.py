@@ -159,7 +159,8 @@ class MCProtoParser:
 
 	@property
 	def pos(self):
-		return {'lineno': self.lex.lineno, \
+		return {'_srcname': self.lex.name, \
+			'lineno': self.lex.lineno, \
 			'col_offset': self.lex.col_offset}
 
 	@property
