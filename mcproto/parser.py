@@ -322,16 +322,17 @@ class MCProtoParser:
 		statements = []
 		while True:
 			if self.lex.token == 'variant':
-				val = self.variantdef()
+				statements.append(self.variantdef())
 			elif self.lex.token == 'namespace':
-				val = self.namespacedef()
+				statements.append(self.namespacedef())
 			elif self.lex.token == 'type':
-				val = self.typedef()
+				statements.append(self.typedef())
+			elif self.lex.token == ';':
+				pass
 			elif self.lex.is_constant() or self.lex.is_ident():
-				val = self.field_or_constraint()
+				statements.append(self.field_or_constraint())
 			else:
 				break
-			statements.append(val)
 			self.lex.expect(';')
 		return Body(statements, **pos)
 
