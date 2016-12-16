@@ -375,7 +375,7 @@ namespace play315 {
 				far : bool;
 				x, y, z, ox, oy, oz, data : float;
 				count : int;
-				data : bytes eof;
+				extra_data : bytes eof;
 			};
 
 			namespace entity {

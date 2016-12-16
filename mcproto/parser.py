@@ -2,7 +2,7 @@ import re
 
 from .ast import *
 
-__all__ = ['parse']
+__all__ = ['MCProtoLexer', 'MCProtoParser']
 
 def make_value(value, **kwargs):
 	if not isinstance(value, str):
