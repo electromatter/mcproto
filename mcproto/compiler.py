@@ -9,8 +9,9 @@ __all__ = ['MCProtoNamespace', 'MCProtoStruct', 'MCProtoField',
 		'MCProtoCompiler']
 
 class MCProtoScopeView:
-	def __init__(self, namespace):
+	def __init__(self, namespace, include_parents=True):
 		self.namespace = namespace
+		self.include_parents = include_parents
 
 	def __contains__(self, key):
 		try:
@@ -20,7 +21,7 @@ class MCProtoScopeView:
 		return True
 
 	def __getitem__(self, key):
-		return self.namespace.lookup(key)
+		return self.namespace.lookup(key, self.include_parents)
 
 class MCProtoBaseNamespace(collections.abc.MutableMapping):
 	def __init__(self):
@@ -77,15 +78,15 @@ class MCProtoBaseNamespace(collections.abc.MutableMapping):
 	def __len__(self):
 		return len(self.namespace)
 
-	def scope(self):
-		return MCProtoScopeView(self)
+	def scope(self, include_parents=True):
+		return MCProtoScopeView(self, include_parents)
 
-	def lookup(self, key, include_parents):
+	def lookup(self, key, include_parents=True):
 		path = key.split('.')
-		self, key = self.namespace._lookup(path, include_parents)
+		self, key = self._lookup(path, include_parents)
 		return self[key]
 
-	def _lookup(self, path, include_parents=True):
+	def _lookup(self, path, include_parents):
 		while True:
 			val = self
 			for key in path:
