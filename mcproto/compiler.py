@@ -5,7 +5,22 @@ from .parser import parse
 from .ast import *
 from .types import *
 
-__all__ = ['MCProtoNamespace', 'MCProtoStruct', 'MCProtoField']
+__all__ = ['MCProtoNamespace', 'MCProtoStruct', 'MCProtoField',
+		'MCProtoCompiler']
+
+class MCProtoScopeView:
+	def __init__(self, namespace):
+		self.namespace = namespace
+
+	def __contains__(self, key):
+		try:
+			self[key]
+		except Exception:
+			return False
+		return True
+
+	def __getitem__(self, key):
+		return self.namespace.lookup(key)
 
 class MCProtoBaseNamespace(collections.abc.MutableMapping):
 	def __init__(self):
@@ -61,6 +76,14 @@ class MCProtoBaseNamespace(collections.abc.MutableMapping):
 
 	def __len__(self):
 		return len(self.namespace)
+
+	def scope(self):
+		return MCProtoScopeView(self)
+
+	def lookup(self, key, include_parents):
+		path = key.split('.')
+		self, key = self.namespace._lookup(path, include_parents)
+		return self[key]
 
 	def _lookup(self, path, include_parents=True):
 		while True:
