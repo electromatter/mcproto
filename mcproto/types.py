@@ -40,11 +40,19 @@ Enum types:
 
 """
 
+from .ast import *
+
+__all__ = ['MCProtoBaseType', 'build_type']
+
 integral = {'bool', 'varint', 'varlong', 'ubyte', 'byte',
 	    'ushort', 'short', 'uint', 'int', 'ulong', 'long'}
 
 simple = integral \
 	 | {'float', 'double', 'position', 'angle', 'metadata', 'angle'}
 
+class MCProtoBaseType:
+	pass
 
+def build_type(spec, parent):
+	pass
 

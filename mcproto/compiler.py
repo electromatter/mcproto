@@ -3,6 +3,7 @@ import re
 
 from .parser import parse
 from .ast import *
+from .types import *
 
 __all__ = ['MCProtoNamespace', 'MCProtoStruct', 'MCProtoField']
 
@@ -12,12 +13,47 @@ class MCProtoBaseNamespace(collections.abc.MutableMapping):
 		self.namespace = collections.OrderedDict()
 
 	def __setitem__(self, key, value):
+		if not key:
+			raise KeyError(key)
+
+		if not isinstance(key, str):
+			raise TypeError('key must be str')
+
+		path = key.split('.')
+		if len(path) > 1:
+			self, key = self._lookup(path, False)
+			self[key] = value
+			return
+
 		self.namespace[key] = value
 
 	def __getitem__(self, key):
+		if not key:
+			raise KeyError(key)
+
+		if not isinstance(key, str):
+			raise TypeError('key must be str')
+
+		path = key.split('.')
+		if len(path) > 1:
+			self, key = self._lookup(path, False)
+			return self[key]
+
 		return self.namespace[key]
 
 	def __delitem__(self, key):
+		if not key:
+			raise KeyError(key)
+
+		if not isinstance(key, str):
+			raise TypeError('key must be str')
+
+		path = key.split('.')
+		if len(path) > 1:
+			self, key = self._lookup(path, False)
+			del self[key]
+			return
+
 		del self.namespace[key]
 
 	def __iter__(self):
@@ -25,6 +61,27 @@ class MCProtoBaseNamespace(collections.abc.MutableMapping):
 
 	def __len__(self):
 		return len(self.namespace)
+
+	def _lookup(self, path, include_parents=True):
+		while True:
+			val = self
+			for key in path:
+				try:
+					cont = val
+					val = val[key]
+				except Exception:
+					break
+			else:
+				# return actual container and key
+				return cont, path[-1]
+
+			# if we cannot continue, raise KeyError
+			if not include_parents or self.parent is None:
+				raise KeyError('.'.join(path))
+
+			# retry on parent scope
+			self = self.parent
+
 
 class MCProtoNamespace(MCProtoBaseNamespace):
 	def __init__(self, parent=None, name=None):
@@ -62,21 +119,6 @@ class MCProtoNamespace(MCProtoBaseNamespace):
 			raise ValueError('cannot find parent struct %s' % pos)
 
 		parent.build_branch(name, struct, pos)
-
-	def lookup(self, name, include_parents=True):
-		path = name.split('.')
-		while parent is not None:
-			val = self
-			for key in path:
-				if key not in val:
-					break
-				val = val[key]
-			else:
-				return val
-			if not include_parents:
-				break
-			self = self.parent
-		raise KeyError(name)
 
 class MCProtoField:
 	def __init__(self, field_type):
@@ -118,7 +160,10 @@ class MCProtoStruct(MCProtoNamespace):
 			raise ValueError('inconsistent constarint at %s' \
 					 % node.pos)
 
+		# TODO: Typecheck constraint
+
 		self.constraints[name] = val
+		self.order.append(('test', name, val))
 
 	def build_branch(self, name, struct, pos=None):
 		if name in self.branches:
@@ -220,17 +265,12 @@ class MCProtoCompiler:
 	def build_type(self, spec, parent):
 		if isinstance(spec, TypeSpec):
 			# alias type
-			return self.type_with_parameters(spec, parent)
+			return build_type(spec, parent)
 		else:
 			# struct type
 			return self.build_namespace(spec,
 						    parent,
 						    factory=MCProtoStruct)
-
-	def type_with_parameters(self, spec, parent):
-		#TODO construct type
-		print(spec)
-		pass
 
 # this should be the last line
 def compile(name, src=None):
