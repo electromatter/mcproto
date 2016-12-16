@@ -61,7 +61,7 @@ class MCProtoNamespace(MCProtoBaseNamespace):
 		if parent is None:
 			raise ValueError('cannot find parent struct %s' % pos)
 
-		parent.named_branch(name, struct, pos)
+		parent.build_branch(name, struct, pos)
 
 	def lookup(self, name, include_parents=True):
 		path = name.split('.')
@@ -78,8 +78,6 @@ class MCProtoNamespace(MCProtoBaseNamespace):
 			self = self.parent
 		raise KeyError(name)
 
-	__repr__ = object.__repr__
-
 class MCProtoField:
 	def __init__(self, field_type):
 		self.field_type = field_type
@@ -89,6 +87,7 @@ class MCProtoStruct(MCProtoNamespace):
 		super().__init__(*args, **kwargs)
 		self.fields = collections.OrderedDict()
 		self.constraints = collections.OrderedDict()
+		self.branches = collections.OrderedDict()
 		self.order = []
 
 		#inherit fields from parent
@@ -100,20 +99,35 @@ class MCProtoStruct(MCProtoNamespace):
 	def build_field(self, name, field_type, pos=None):
 		if name in self.fields:
 			raise ValueError('duplicate %r at %s' % (name, pos))
-		self.fields[name] = MCProtoField(field_type)
-		self.order.append(('field', name))
+		self.fields[name] = field = MCProtoField(field_type)
+		self.order.append(('field', name, field))
 
 	def build_constraint(self, node):
-		# TODO
-		# verify this was consistent
-		print('constrain', node)
+		# verify the constraint is consistent
+		# and add it to the constraint list
+
+		if not isinstance(node.left, Identifier) \
+		   or not isinstance(node.right, Value):
+			raise ValueError('expected ident = value at %s' \
+					  % node.pos)
+
+		name = str(node.left)
+		val = node.right.value
+
+		if self.constraints.get(name, val) != val:
+			raise ValueError('inconsistent constarint at %s' \
+					 % node.pos)
+
+		self.constraints[name] = val
 
 	def build_branch(self, name, struct, pos=None):
-		# create a branch
-		self.order.append(('branch', name))
+		if name in self.branches:
+			raise ValueError('duplicate branch %r at %s' \
+					  % (name, pos))
 
-		# verify this is consistent
-		print('branch', name)
+		# create a branch
+		self.order.append(('branch', name, struct))
+		self.branches[name] = struct
 
 class MCProtoProxyStruct(MCProtoStruct):
 	def __setitem__(self, key, value):
@@ -130,6 +144,12 @@ class MCProtoProxyStruct(MCProtoStruct):
 
 	def __len__(self):
 		return len(self.parent)
+
+	def _find_struct(self, *args, **kwargs):
+		raise NotImplementedError()
+
+	def build_branch(self, *args, **kwargs):
+		raise NotImplementedError()
 
 class MCProtoCompiler:
 	def __init__(self):
