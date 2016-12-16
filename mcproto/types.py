@@ -40,5 +40,11 @@ Enum types:
 
 """
 
+integral = {'bool', 'varint', 'varlong', 'ubyte', 'byte',
+	    'ushort', 'short', 'uint', 'int', 'ulong', 'long'}
+
+simple = integral \
+	 | {'float', 'double', 'position', 'angle', 'metadata', 'angle'}
+
 
 
