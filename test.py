@@ -10,7 +10,7 @@ def main():
 	else:
 		src = sys.argv[1]
 
-	code = compiler._compile(src)
+	code = compiler.compile(src)
 	print('---')
 	print(code)
 

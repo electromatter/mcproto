@@ -104,7 +104,7 @@ array <size> <elem type>
 string <size or nul> <encoding: utf8, utf16>
 
 bytes <size>
-uuid <encoding: bin, hex, ascii>
+uuid <encoding: bin, hex>
 
 #<size> takes: eof, <integer type>, <integer constant>
 

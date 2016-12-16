@@ -15,7 +15,7 @@ class Node:
 
 	@property
 	def pos(self):
-		return '%s:%i col %i' % (self.srcname, \
+		return '%s:%i col %i' % (self._srcname, \
 					 self.lineno, \
 					 self.col_offset)
 
