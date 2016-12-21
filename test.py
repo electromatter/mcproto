@@ -16,8 +16,10 @@ def main():
 
 	code = mcproto.compiler.compile(src)
 
-	for obj in mcproto.types.walk(code):
-		print(obj)
+	for path, obj in mcproto.types.walk(code):
+		if isinstance(obj, mcproto.MCProtoBuiltinType):
+			continue
+		print(path, obj)
 
 	return code
 
