@@ -1,4 +1,5 @@
 import collections
+import collections.abc
 import re
 
 from .parser import parse
@@ -16,7 +17,7 @@ class MCProtoVariant(MCProtoStruct):
 		parent = self.parent
 		path = self.name
 		while not isinstance(parent, MCProtoStruct):
-			assert parent
+			assert parent is not None
 			if path is None or parent.name is None:
 				raise ValueError('anon branch inside a namespace?')
 			path = '%s.%s' % (parent.name, path)
@@ -51,8 +52,11 @@ class MCProtoCompiler:
 		self.namespace = MCProtoNamespace()
 		self.type_factory = MCProtoTypeFactory(self)
 
+	def _globals(self, *args, **kwargs):
+		return self.namespace
+
 	def compile(self, name, src=None):
-		self.build_namespace(parse(name, src), self.namespace)
+		self.build_namespace(parse(name, src), factory=self._globals)
 
 	def build_namespace(self,
 			    body,
@@ -77,6 +81,10 @@ class MCProtoCompiler:
 								  name)
 			elif isinstance(child, TypeDef):
 				dest[name] = self.build_type(child.spec, dest)
+
+				# dirty hack to make typedefs {struct} work
+				if dest[name].name is None:
+					dest[name].name = name
 			elif isinstance(child, VariantDef):
 				if child.name:
 					factory = MCProtoVariant

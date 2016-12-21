@@ -1,4 +1,5 @@
 import collections
+import collections.abc
 
 from .ast import *
 from .types import MCProtoBaseType
@@ -126,6 +127,10 @@ class MCProtoField:
 
 class MCProtoStruct(MCProtoNamespace, MCProtoBaseType):
 	_types = ('fields', 'namespace')
+
+	def __hash__(self):
+		#dirty hack to get memorization to work
+		return id(self)
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

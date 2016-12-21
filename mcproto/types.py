@@ -84,7 +84,7 @@ class MCProtoParamType(MCProtoBuiltinType):
 
 		cached = self._POOL.get(key, None)
 		if cached is None:
-			cached = key[0](key[1])
+			cached = key[0](self.name, *key[1])
 			self._POOL[key] = cached
 		return cached
 
@@ -168,10 +168,13 @@ class MCProtoBytesType(MCProtoBaseStringType):
 			# constant length
 			length = int(length)
 		else:
-			# int type length
-			length = factory(length)
-			if not isinstance(length, MCProtoIntType):
-				raise ValueError('expected int type for <length> at %s' % spec.pos)
+			if isinstance(length, Identifier) and str(length) == 'eof':
+				length = -1
+			else:
+				# int type length
+				length = factory(length)
+				if not isinstance(length, MCProtoIntType):
+					raise ValueError('expected int type for <length> at %s' % spec.pos)
 
 		return self.parameterize(length)
 
@@ -262,8 +265,8 @@ class MCProtoTypeFactory:
 		if parent is not None:
 			self.parent = parent
 
-		if isinstance(spec, str):
-			return builtin_types[spec]
+		if isinstance(spec, str) or isinstance(spec, Identifier):
+			return self._build_type(TypeSpec([Identifier(str(spec))]))
 		elif isinstance(spec, TypeSpec):
 			return self._build_type(spec)
 		else:
