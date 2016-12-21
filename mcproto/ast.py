@@ -14,8 +14,14 @@ class Node:
 		self.col_offset = kwargs.get('col_offset', None)
 
 	@property
+	def pos_dict(self):
+		return {'_srcname': self._srcname, \
+			'lineno': self.lineno, \
+			'col_offset': self.col_offset}
+
+	@property
 	def pos(self):
-		return '%s:%i col %i' % (self._srcname, \
+		return '%s:%r col %r' % (self._srcname, \
 					 self.lineno, \
 					 self.col_offset)
 

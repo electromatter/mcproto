@@ -1,43 +1,10 @@
 #!/usr/bin/env python3
 
-from mcproto.types import MCProtoBaseType
-from mcproto import compiler
+import mcproto
 
-def walk_types(code, seen=None):
-	if seen is None:
-		seen = set()
-
-	if isinstance(code, str):
-		return
-
-	try:
-		if code in seen:
-			return
-	except TypeError:
-		pass
-
-	if isinstance(code, MCProtoBaseType):
-		seen.add(code)
-		yield code
-
-	if hasattr(code, '_types'):
-		for name in code._types:
-			branch = getattr(code, name, None)
-
-			# check if we have already seen this type 
-			yield from walk_types(branch, seen)
-	else:
-		if hasattr(code, 'values'):
-			children = code.values()
-		else:
-			try:
-				children = iter(code)
-			except TypeError:
-				return
-
-		# we got a dict or iterable
-		for child in children:
-			yield from walk_types(child, seen)
+# generate types
+# generate parser
+# generate generators
 
 def main():
 	import sys
@@ -47,10 +14,10 @@ def main():
 	else:
 		src = sys.argv[1]
 
-	code = compiler.compile(src)
+	code = mcproto.compiler.compile(src)
 
-	for obj in walk_types(code):
-		print(obj.name)
+	for obj in mcproto.types.walk(code):
+		print(obj)
 
 	return code
 

@@ -4,7 +4,8 @@ import collections.abc
 from .ast import *
 from .types import MCProtoBaseType
 
-__all__ = ['MCProtoNamespace', 'MCProtoField', 'MCProtoStruct']
+__all__ = ['MCProtoNamespace', 'MCProtoField', 'MCProtoStruct',
+	   'MCProtoVariant', 'MCProtoProxyVariant']
 
 class MCProtoScopeView:
 	def __init__(self, namespace, include_parents=True):
@@ -172,4 +173,42 @@ class MCProtoStruct(MCProtoNamespace, MCProtoBaseType):
 		# create a branch
 		self.order.append(('branch', struct.path, struct))
 		self.branches[struct.path] = struct
+
+class MCProtoVariant(MCProtoStruct):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		# find base
+		parent = self.parent
+		path = self.name
+		while not isinstance(parent, MCProtoStruct):
+			assert parent is not None
+			if path is None or parent.name is None:
+				raise ValueError('anon branch inside a namespace?')
+			path = '%s.%s' % (parent.name, path)
+			parent = parent.parent
+
+		# set self.base and self.path
+		self.path = path
+		self.base = parent
+
+		# inherit fields and constraints from base
+		self.fields.update(self.base.fields)
+		self.constraints.update(self.base.constraints)
+
+class MCProtoProxyVariant(MCProtoVariant):
+	def __setitem__(self, key, value):
+		self.parent[key] = value
+
+	def __getitem__(self, key):
+		return self.parent[key]
+
+	def __delitem__(self, key):
+		del self.parent[key]
+
+	def __iter__(self):
+		return iter(self.parent)
+
+	def __len__(self):
+		return len(self.parent)
 

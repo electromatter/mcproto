@@ -58,7 +58,7 @@ class MCProtoBaseType:
 
 from .namespace import *
 
-__all__ = ['MCProtoBaseType', 'MCProtoStruct',
+__all__ = ['MCProtoBaseType', 'MCProtoStruct', 'MCProtoVariant',
 	   'MCProtoBuiltinType', 'MCProtoParamType',
 	   'MCProtoSimpleType', 'MCProtoIntType', 'MCProtoBaseStringType',
 	   'MCProtoStringType', 'MCProtoBytesType', 'MCProtoUUIDType',
@@ -249,7 +249,7 @@ class MCProtoTypeFactory:
 		type_val = builtin_types.get(name, None)
 
 		if type_val is None:
-			type_val = parent.get(name, None)
+			type_val = self.parent.get(name, None)
 
 		if type_val is None:
 			raise ValueError('unknown type %r at %s' % (name, spec.pos))
@@ -265,10 +265,49 @@ class MCProtoTypeFactory:
 		if parent is not None:
 			self.parent = parent
 
-		if isinstance(spec, str) or isinstance(spec, Identifier):
-			return self._build_type(TypeSpec([Identifier(str(spec))]))
+		if isinstance(spec, str):
+			return self._build_type(TypeSpec([Identifier(spec)]))
+		elif isinstance(spec, Identifier):
+			return self._build_type(TypeSpec([spec], **spec.pos_dict))
 		elif isinstance(spec, TypeSpec):
 			return self._build_type(spec)
 		else:
 			return self._build_struct(spec)
+
+def make_field_name(name):
+	return '^%s' % name 
+
+def walk(obj, path=(), seen=None):
+	"""
+	yields (path, type) for each instance of MCProtoBaseType in a given MCProtoNamespace
+
+	path is a tuple of identifiers of the path followed to reach the first
+	usage of a particular type
+
+	If an identifier starts with ^ it is a field otherwise it is a namespace or struct or variant
+	"""
+
+	if seen is None:
+		seen = set()
+
+	try:
+		if obj in seen:
+			return
+	except TypeError:
+		pass
+
+	if isinstance(obj, MCProtoNamespace):
+		for name, child in obj.namespace.items():
+			for mcp_type in walk(child, path + (name,), seen):
+				yield mcp_type
+
+	if isinstance(obj, MCProtoStruct):
+		for name, field in obj.fields.items():
+			name = make_field_name(name)
+			for mcp_type in walk(field.field_type, path + (name,), seen):
+				yield mcp_type
+
+	if isinstance(obj, MCProtoBaseType):
+		yield path, obj
+		seen.add(obj)
 
