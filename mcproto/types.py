@@ -274,40 +274,75 @@ class MCProtoTypeFactory:
 		else:
 			return self._build_struct(spec)
 
-def make_field_name(name):
-	return '^%s' % name 
-
 def walk(obj, path=(), seen=None):
 	"""
-	yields (path, type) for each instance of MCProtoBaseType in a given MCProtoNamespace
+	All types that derive from MCProtoBaseType define a property cls._types
+	is a tuple that defines the names of the children links in this tree.
 
-	path is a tuple of identifiers of the path followed to reach the first
-	usage of a particular type
+	Link names that start with:
+	 - '^' intrpreted as field namespace, a dict is expected
+	 - '**' intrpreted as a namespace, a dict is expected
+	 - '*' intrpreted as a list, an iterable is expected
+	 - othewise, it is intrpreted as a single link
 
-	If an identifier starts with ^ it is a field otherwise it is a namespace or struct or variant
+	This function yields (path, type) for the first instance of each
+	MCProtoBaseType in a given tree.
+
+	Path is a tuple of identifiers of the path followed to reach the first
+	usage of a particular type. If an identifier in path starts with ^,
+	it was anonymously defined and first used with a field of the name that
+	follows the ^.
 	"""
 
+	if obj is None:
+		return
+
+	# use a set to only yield the first
 	if seen is None:
 		seen = set()
-
 	try:
 		if obj in seen:
 			return
 	except TypeError:
 		pass
 
-	if isinstance(obj, MCProtoNamespace):
-		for name, child in obj.namespace.items():
-			for mcp_type in walk(child, path + (name,), seen):
-				yield mcp_type
+	# nodes in our tree have types attribute
+	for child_name in getattr(obj, '_types', ()):
+		if child_name.startswith('^'):
+			ns = getattr(obj, child_name[1:], None)
 
-	if isinstance(obj, MCProtoStruct):
-		for name, field in obj.fields.items():
-			name = make_field_name(name)
-			for mcp_type in walk(field.field_type, path + (name,), seen):
-				yield mcp_type
+			if not ns:
+				continue
+
+			for name, child in ns.items():
+				name = '^%s' % name
+				for _type in walk(child, path + (name,), seen):
+					yield _type
+		elif child_name.startswith('**'):
+			ns = getattr(obj, child_name[2:], None)
+
+			if not ns:
+				continue
+
+			for name, child in ns.items():
+				for _type in walk(child, path + (name,), seen):
+					yield _type
+		elif child_name.startswith('*'):
+			ns = getattr(obj, child_name[1:], None)
+
+			if not ns:
+				continue
+
+			for child in ns:
+				for _type in walk(child, path, seen):
+					yield _type
+		else:
+			child = getattr(obj, child_name, None)
+			for _type in walk(child, path, seen):
+				yield _type
 
 	if isinstance(obj, MCProtoBaseType):
 		yield path, obj
 		seen.add(obj)
+
 

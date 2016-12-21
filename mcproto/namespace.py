@@ -23,7 +23,7 @@ class MCProtoScopeView:
 		return self.namespace.lookup(key, self.include_parents)
 
 class MCProtoBaseNamespace(collections.abc.MutableMapping):
-	_types = ('namespace', )
+	_types = ('**namespace', )
 
 	def __init__(self):
 		super().__init__()
@@ -127,7 +127,7 @@ class MCProtoField:
 		self.field_type = field_type
 
 class MCProtoStruct(MCProtoNamespace, MCProtoBaseType):
-	_types = ('fields', 'namespace')
+	_types = ('^fields', '**namespace')
 
 	def __hash__(self):
 		#dirty hack to get memorization to work
