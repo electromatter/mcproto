@@ -1,13 +1,11 @@
 namespace handshake {
-	type sb {
+	type start {
 		id : varint;
-		variant start {
-			id=0x00;
-			version : varint;
-			address : string;
-			port : ushort;
-			target : varint;
-		};
+		id=0x00;
+		version : varint;
+		address : string;
+		port : ushort;
+		target : varint;
 	};
 };
 
