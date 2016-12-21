@@ -7,6 +7,9 @@ def walk_types(code, seen=None):
 	if seen is None:
 		seen = set()
 
+	if isinstance(code, str):
+		return
+
 	try:
 		if code in seen:
 			return

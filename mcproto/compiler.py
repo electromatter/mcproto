@@ -81,10 +81,6 @@ class MCProtoCompiler:
 								  name)
 			elif isinstance(child, TypeDef):
 				dest[name] = self.build_type(child.spec, dest)
-
-				# dirty hack to make typedefs {struct} work
-				if dest[name].name is None:
-					dest[name].name = name
 			elif isinstance(child, VariantDef):
 				if child.name:
 					factory = MCProtoVariant
