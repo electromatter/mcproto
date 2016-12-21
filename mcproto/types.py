@@ -63,7 +63,8 @@ __all__ = ['MCProtoBaseType', 'MCProtoStruct', 'MCProtoVariant',
 	   'MCProtoSimpleType', 'MCProtoIntType', 'MCProtoBaseStringType',
 	   'MCProtoStringType', 'MCProtoBytesType', 'MCProtoUUIDType',
 	   'MCProtoBaseArrayType', 'MCProtoArrayType',
-	   'MCProtoBoolOptionalType', 'MCProtoTypeFactory']
+	   'MCProtoBoolOptionalType', 'MCProtoTypeFactory',
+	   'MCProtoVisitor']
 
 def register_type(name):
 	def func(cls):
@@ -345,4 +346,37 @@ def walk(obj, path=(), seen=None):
 		yield path, obj
 		seen.add(obj)
 
+class MCProtoVisitor:
+	'see walk()'
+
+	def visit(self, obj, path=()):
+		if isinstance(obj, MCProtoStruct):
+			return self.visit_struct(obj, path)
+		elif isinstance(obj, MCProtoNamespace):
+			return self.visit_namespace(obj, path)
+		elif isinstance(obj, MCProtoBuiltinType):
+			return self.visit_builtin(obj, path)
+		else:
+			return
+
+	def visit_namespace(self, obj, path=()):
+		for name, child in obj.namespace.items():
+			self.visit(child, path + (name,))
+
+	def visit_struct(self, obj, path=()):
+		self.visit_namespace(obj, path)
+
+		for name, field in obj.fields.items():
+			self.visit(field.field_type, path + ('^' + name,))
+
+	def visit_builtin(self, obj, path):
+		for linkname in getattr(obj, '_types', ()):
+			assert linkname[0] not in '^*', 'namespace in builtin type?'
+
+			child = getattr(obj, linkname, None)
+
+			if child is None:
+				continue
+
+			self.visit(child, path)
 

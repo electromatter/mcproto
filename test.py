@@ -6,6 +6,14 @@ import mcproto
 # generate parser
 # generate generators
 
+class MCProtoPythonGenerator(mcproto.types.MCProtoVisitor):
+	def __init__(self):
+		self.seen = set()
+
+	def visit_struct(self, obj, path):
+		super().visit_struct(obj, path)
+		print(path, obj)
+
 def main():
 	import sys
 
@@ -16,10 +24,7 @@ def main():
 
 	code = mcproto.compiler.compile(src)
 
-	for path, obj in mcproto.types.walk(code):
-		if isinstance(obj, mcproto.MCProtoBuiltinType):
-			continue
-		print(path, obj)
+	MCProtoPythonGenerator().visit(code)
 
 	return code
 
