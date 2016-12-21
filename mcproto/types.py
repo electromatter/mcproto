@@ -76,7 +76,17 @@ class MCProtoBuiltinType(MCProtoBaseType):
 		self.name = name
 
 class MCProtoParamType(MCProtoBuiltinType):
-	pass
+	_POOL = {}
+
+	# memorize the result to reduce reuse the constructed types
+	def parameterize(self, *args):
+		key = (self.__class__, args)
+
+		cached = self._POOL.get(key, None)
+		if cached is None:
+			cached = key[0](key[1])
+			self._POOL[key] = cached
+		return cached
 
 @register_type('float')
 @register_type('double')
@@ -106,35 +116,92 @@ class MCProtoIntType(MCProtoSimpleType):
 class MCProtoBaseStringType(MCProtoParamType):
 	_types = ('length',)
 
+	def __init__(self, name, length=None):
+		super().__init__(name)
+		self.length = length
+
 @register_type('string')
 class MCProtoStringType(MCProtoBaseStringType):
-	INSTANCES = {}
+	ENCODINGS = {'utf8', 'utf16'}
+	DEFAULT_ENCODING = 'utf8'
+	DEFAULT_LENGTH = 'varint'
+
+	def __init__(self, name, length=None, encoding=None):
+		super().__init__(name, length or self.DEFAULT_LENGTH)
+		self.encoding = encoding or self.DEFAULT_ENCODING
 
 	def __call__(self, spec, factory):
 		if len(spec.args) > 3:
 			raise ValueError('too many arguments: "string <length> <encoding>" at %s' % spec.pos)
 
-		print(spec)
+		# default to DEFAULT_LENGTH
+		length = spec.args[1] if len(spec.args) > 1 else self.length
+		if isinstance(length, Number):
+			# constant length
+			length = int(length)
+		else:
+			# int type length
+			length = factory(length)
+			if not isinstance(length, MCProtoIntType):
+				raise ValueError('expected int type for <length> at %s' % spec.pos)
+
+		encoding = str(spec.args[2]) if len(spec.args) > 2 else self.encoding
+		if encoding not in self.ENCODINGS:
+			raise ValueError('unknown encoding %s at %s' % (encoding, spec.pos))
+
+		return self.parameterize(length, encoding)
 
 @register_type('bytes')
 class MCProtoBytesType(MCProtoBaseStringType):
+	DEFAULT_LENGTH = 'varint'
+
+	def __init__(self, name, length=None):
+		super().__init__(name, length or self.DEFAULT_LENGTH)
+
 	def __call__(self, spec, factory):
 		if len(spec.args) > 2:
 			raise ValueError('too many arguments: "bytes <length>" at %s' % spec.pos)
 
-		print(spec)
+		# default to DEFAULT_LENGTH
+		length = spec.args[1] if len(spec.args) > 1 else self.length
+		if isinstance(length, Number):
+			# constant length
+			length = int(length)
+		else:
+			# int type length
+			length = factory(length)
+			if not isinstance(length, MCProtoIntType):
+				raise ValueError('expected int type for <length> at %s' % spec.pos)
+
+		return self.parameterize(length)
 
 @register_type('uuid')
-class MCProtoUUIDType(MCProtoBaseStringType):
+class MCProtoUUIDType(MCProtoParamType):
+	ENCODINGS = {'rfc', 'hex', 'bin'}
+	DEFAULT_ENCODING = 'bin'
+
+	def __init__(self, name, encoding=None):
+		super().__init__(name)
+		self.encoding = encoding or self.DEFAULT_ENCODING
+
 	def __call__(self, spec, factory):
 		if len(spec.args) > 2:
 			raise ValueError('too many arguments: "uuid <encoding>" at %s' % spec.pos)
 
-		print(spec)
+		encoding = str(spec.args[1]) if len(spec.args) > 1 else self.encoding
+		if encoding not in self.ENCODINGS:
+			raise ValueError('unknown encoding %s at %s' % (encoding, spec.pos))
+
+		return self.parameterize(encoding)
 
 # arrays
 class MCProtoBaseArrayType(MCProtoParamType):
 	_types = ('length', 'elem')
+
+	def __init__(self, name, length=None, elem=None):
+		super().__init__(name)
+		self.length = length
+		self.elem = elem
 
 @register_type('array')
 class MCProtoArrayType(MCProtoBaseArrayType):
@@ -150,11 +217,9 @@ class MCProtoArrayType(MCProtoBaseArrayType):
 		if not isinstance(length, int) and not isinstance(length, MCProtoIntType):
 			raise ValueError('expected int type for <length> at %s' % spec.pos)
 
-		result = MCProtoArrayType(self.name)
-		result.length = length
-		result.elem = factory(spec.args[2])
+		elem = factory(spec.args[2])
 
-		return result
+		return self.parameterize(length, elem)
 
 @register_type('bool_optional')
 class MCProtoBoolOptionalType(MCProtoBaseArrayType):
@@ -162,11 +227,10 @@ class MCProtoBoolOptionalType(MCProtoBaseArrayType):
 		if len(spec.args) != 2:
 			raise ValueError('expected "bool_optional <elem>" at %s' % spec.pos)
 
-		result = MCProtoBoolOptionalType(self.name)
-		result.length = factory('bool')
-		result.elem = factory(spec.args[1])
+		length = factory('bool')
+		elem = factory(spec.args[1])
 
-		return result
+		return self.parameterize(length, elem)
 
 class MCProtoTypeFactory:
 	def __init__(self, compiler):
@@ -198,8 +262,10 @@ class MCProtoTypeFactory:
 		if parent is not None:
 			self.parent = parent
 
-		if isinstance(spec, TypeSpec):
-			self._build_type(spec)
+		if isinstance(spec, str):
+			return builtin_types[spec]
+		elif isinstance(spec, TypeSpec):
+			return self._build_type(spec)
 		else:
-			self._build_struct(spec)
+			return self._build_struct(spec)
 
