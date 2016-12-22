@@ -42,9 +42,10 @@ it refers to.
 
 """
 
-import primitive
 import enum
 import io
+
+from . import primitive
 
 class Type(enum.IntEnum):
 	BYTE			= 0
