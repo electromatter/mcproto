@@ -72,7 +72,7 @@ class Direction(enum.IntEnum):
 
 class MetadataCodec:
 	def __init__(self, schema=None, strict=True):
-		self.strict = struct
+		self.strict = strict
 		self.schema = schema or dict()
 
 	def dumps(self, obj):
