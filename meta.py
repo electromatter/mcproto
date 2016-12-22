@@ -42,6 +42,7 @@ it refers to.
 
 """
 
+import collections
 import enum
 import io
 
@@ -69,6 +70,9 @@ class Direction(enum.IntEnum):
 	SOUTH		= 3
 	WEST		= 4
 	EAST		= 5
+
+Rotation = collections.namedtuple('Rotation', 'rx ry rz')
+BlockType = collections.namedtuple('BlockType', 'blockid meta')
 
 class MetadataCodec:
 	def __init__(self, schema=None, strict=True):
@@ -105,9 +109,9 @@ class MetadataCodec:
 		elif val_type == Type.BOOL:
 			return primitive.BOOL.load(f)
 		elif val_type == Type.ROTATION:
-			return (primitive.FLOAT.load(f),
-				primitive.FLOAT.load(f),
-				primitive.FLOAT.load(f))
+			return Rotation(primitive.FLOAT.load(f),
+					primitive.FLOAT.load(f),
+					primitive.FLOAT.load(f))
 		elif val_type == Type.OPTIONAL_POSITION:
 			if not primitive.BOOL.load(f):
 				return None:
@@ -124,7 +128,7 @@ class MetadataCodec:
 			val = primitive.VARINT.load(f)
 			if val == 0:
 				return None
-			return (val >> 4, val & 0x0f)
+			return BlockType(val >> 4, val & 0x0f)
 		else:
 			raise ValueError('invalid type %r' % val_type)
 
@@ -181,10 +185,9 @@ class MetadataCodec:
 		elif val_type == Type.BOOL:
 			primitive.BOOL.dump(f, val)
 		elif val_type == Type.ROTATION:
-			(x, y, z) = val
-			primitive.FLOAT.dump(f, x)
-			primitive.FLOAT.dump(f, y)
-			primitive.FLOAT.dump(f, z)
+			primitive.FLOAT.dump(f, val.rx)
+			primitive.FLOAT.dump(f, val.ry)
+			primitive.FLOAT.dump(f, val.rz)
 		elif val_type == Type.OPTIONAL_POSITION:
 			primitive.BOOL.dump(f, val)
 			if val:
@@ -198,8 +201,8 @@ class MetadataCodec:
 		elif val_type == Type.OPTIONAL_BLOCK_TYPE:
 			if not val:
 				primitive.VARINT.dump(0)
-			(block, meta) = val
-			primitive.VARINT.dump(block << 4 | (meta & 0x0f))
+			val = (val.blockid << 4) | (val.meta & 0x0f)
+			primitive.VARINT.dump(val)
 		else:
 			raise ValueError('invalid type %r' % val_type)
 
