@@ -114,7 +114,7 @@ class MetadataCodec:
 					primitive.FLOAT.load(f))
 		elif val_type == Type.OPTIONAL_POSITION:
 			if not primitive.BOOL.load(f):
-				return None:
+				return None
 			else:
 				return primitive.POSITION.load(f)
 		elif val_type == Type.DIRECTION:
