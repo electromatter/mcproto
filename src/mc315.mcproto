@@ -50,7 +50,7 @@ namespace play315 {
 					accepted : bool;
 				};
 
-				variant enchant_item {
+				variant enchant {
 					id=0x06;
 					window, item : byte;	
 				};
@@ -366,7 +366,7 @@ namespace play315 {
 				effect : int;
 				at : position;
 				data : int;
-				global : bool;
+				is_global : bool;
 			};
 
 			variant particle {
