@@ -36,9 +36,19 @@ Utility:
 import collections
 import enum
 import io
-import struct
 import math
+import struct
 import uuid
+
+__all__ = ['Position', 'BlockType', 'BaseCodec', 'IntCodec', 'StructCodec',
+	   'SimpleStructCodec', 'FixedPointCodec', 'VarintCodec', 'AngleCodec',
+	   'PositionCodec', 'BlockTypeCodec', 'BytesCodec', 'StringCodec',
+	   'UUIDCodec', 'ArrayCodec', 'EnumCodec', 'IntEnumCodec',
+	   'Direction'
+	   
+	   'BOOL', 'BYTE', 'UBYTE', 'SHORT', 'USHORT', 'INT', 'UINT', 'LONG', 'ULONG',
+	   'VARINT', 'VARLONG', 'FLOAT', 'DOUBLE', 'ANGLE', 'POSITION', 'BLOCKTYPE',
+	   'STRING', 'BYTES', 'UUID', 'DIRECTION']
 
 Position = collections.namedtuple('Position', 'x y z')
 BlockType = collections.namedtuple('BlockType', 'blockid meta')
@@ -325,7 +335,7 @@ class UUIDCodec(BaseCodec):
 			return uuid.UUID(bytes=val)
 		elif self.encoding == 'hex':
 			return uuid.UUID(val)
-		elif self.encoding == 'rfc'
+		elif self.encoding == 'rfc':
 			return uuid.UUID(val)
 		else:
 			raise AssertionError('unknown encoding?')
