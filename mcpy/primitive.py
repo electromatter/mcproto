@@ -55,18 +55,20 @@ BlockType = collections.namedtuple('BlockType', 'blockid meta')
 
 class BaseCodec:
 	def loads(self, s, *args, **kwargs):
+		'loads value from s using a BytesIO file object using self.load'
 		f = io.BytesIO(s)
 		return self.load(f, *args, **kwargs)
 
 	def dumps(self, *args, **kwargs):
+		'dumps value BytesIO file object using self.dump and returns the result as bytes'
 		f = io.BytesIO()
 		self.dump(f, *args, **kwargs)
 		return bytes(f.getbuffer())
 
-	def load(self, f):
+	def load(self, f, *args, **kwargs):
 		raise NotImplementedError
 
-	def dump(self, f, val):
+	def dump(self, f, val, *args, **kwargs):
 		raise NotImplementedError
 
 class IntCodec(BaseCodec):

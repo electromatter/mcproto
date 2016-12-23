@@ -86,21 +86,25 @@ class RotationCodec(StructCodec):
 
 ROTATION = RotationCodec()
 
-def iter_schema_errors(types, schema):
+def iter_schema_errors(types, schema, strict=True):
 	'yield (key, expected) for every schema error'
 	for key, val in types.items():
 		if key not in schema:
-			yield (key, None)
+			if strict:
+				yield (key, None)
 		elif val != schema[key]:
 			yield (key, schema[key])
 
-def follows_schema(types, schema):
+def follows_schema(types, schema, strict=True):
 	'used to validate schema after-the-fact'
 	try:
-		next(iter_schema_errors(types, schema))
+		next(iter_schema_errors(types, schema, strict))
+		# we got an error
+		return False
 	except StopIteration:
+		# we reached the end of the generator
+		# no errors
 		return True
-	return False
 
 class MetadataCodec(BaseCodec):
 	TYPE = Type
@@ -127,7 +131,7 @@ class MetadataCodec(BaseCodec):
 		'called to convert the resulting dict into a user value'
 		return (obj, types)
 
-	def load(self, f):
+	def load(self, f, schema=None, strict=True):
 		'loads metadata from f see load_hook for return value'
 		metadata = {}
 		types = {}
@@ -140,6 +144,14 @@ class MetadataCodec(BaseCodec):
 				break
 
 			val_type = self.TYPE(BYTE.load(f))
+
+			# schema verification
+			if schema is not None:
+				if key not in schema:
+					if strict:
+						raise ValueError('unexpected key %r' % key)
+				elif val_type != schema[key]:
+					raise ValueError('expected type %r for key %r' % (expected, key))
 
 			# load the value
 			metadata[key] = self.CODEC[val_type].load(f)
