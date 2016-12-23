@@ -135,14 +135,15 @@ class MetadataCodec(BaseCodec):
 
 		return self.load_hook(metadata, types)
 
-	def dump_hook(self, obj, schema):
+	def dump_hook(self, obj_schema):
 		'returns an iterable that returns (key, val_type, value)'
+		obj, schema = obj_schema
 		for key, val in obj.items():
 			yield key, schema[key], val
 
-	def dump(self, f, obj, *args, **kwargs):
+	def dump(self, f, obj_schema):
 		'dumps obj into f according to schema'
-		for key, val_type, value in self.dump_hook(obj, schema, *args, **kwargs):
+		for key, val_type, value in self.dump_hook(obj_schema):
 			self.CODEC[val_type].dump(f, val)
 
 METADATA = MetadataCodec()
