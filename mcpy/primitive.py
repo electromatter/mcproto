@@ -195,7 +195,7 @@ class AngleCodec(BaseCodec):
 		# convert from radians to 1/256 steps
 		val = (val * (256  / 2 * math.pi)) % 256
 		# round to nearest
-		UBYTE.dump(int(round(val)) % 256)
+		UBYTE.dump(f, int(round(val)) % 256)
 
 class PositionCodec(BaseCodec):
 	def load(self, f):
@@ -245,7 +245,7 @@ class BlockTypeCodec(BaseCodec):
 
 	def dump(self, f, val):
 		if val is None:
-			VARINT.dump(0)
+			VARINT.dump(f, 0)
 
 		blockid = int(val.blockid)
 		meta = int(val.meta)
@@ -277,6 +277,9 @@ class BytesCodec(BaseCodec):
 			length = self.length
 		else:
 			length = self.length.load(f)
+
+		if length < 0:
+			raise ValueError('negitive length')
 
 		val = f.read(length)
 		if len(val) != length:
@@ -345,11 +348,11 @@ class UUIDCodec(BaseCodec):
 			raise ValueError('expected uuid.UUID got %r' % val.__class__)
 
 		if self.encoding == 'bin':
-			self.codec.dump(val.bytes)
+			self.codec.dump(f, val.bytes)
 		elif self.encoding == 'hex':
-			self.codec.dump(val.hex)
+			self.codec.dump(f, val.hex)
 		elif self.encoding == 'rfc':
-			self.codec.dump(str(val))
+			self.codec.dump(f, str(val))
 		else:
 			raise AssertionError('unknown encoding?')
 
