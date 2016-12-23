@@ -46,12 +46,14 @@ import collections
 import enum
 import io
 
-from .primitive import BOOL, BYTE, VARINT, FLOAT, STRING, CHAT, SLOT, POSITION, BLOCKTYPE, \
+from .primitive import BOOL, BYTE, VARINT, FLOAT, STRING, SLOT, POSITION, BLOCKTYPE, \
 		       Direction, Position, BlockType, BaseCodec
+
+from .chat	import CHAT
 
 from .nbt	import SLOT
 
-__all__ = ['Type', 'Rotation', 'MetadataCodec', 'load', 'dump', 'loads', 'dumps']
+__all__ = ['Rotation', 'MetadataCodec', 'METADATA']
 
 class Type(enum.IntEnum):
 	BYTE			= 0
@@ -200,4 +202,6 @@ class MetadataCodec(BaseCodec):
 
 		for key, val_type, value in obj.dump_hook(obj):
 			self.dump_value(f, val_type, val, schema)
+
+METADATA = MetadataCodec()
 

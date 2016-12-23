@@ -104,6 +104,17 @@ ULONG = StructIntCodec('>L')
 FLOAT = SimpleStructCodec('>f')
 DOUBLE = SimpleStructCodec('>d')
 
+class FixedPointCodec(BaseCodec):
+	def __init__(self, codec=INT, coeff=32):
+		self.codec = codec
+		self.coeff = coeff
+
+	def load(self, f):
+		return self.codec.load(f) / self.coeff
+
+	def dump(self, f, val):
+		self.codec.dump(f, int(round(val * self.coeff)))
+
 class VarintCodec(IntCodec):
 	def __init__(self, nbits=32):
 		assert nbits > 1
