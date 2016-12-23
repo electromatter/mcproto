@@ -302,7 +302,7 @@ class StringCodec(BaseCodec):
 		''.encode(encoding)
 
 	def load(self, f):
-		return self.codec.load().decode(self.encoding)
+		return self.codec.load(f).decode(self.encoding)
 
 	def dump(self, f, val):
 		if not isinstance(val, str):

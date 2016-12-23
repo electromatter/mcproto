@@ -121,11 +121,13 @@ class MetadataCodec(BaseCodec):
 		types = {}
 
 		while True:
-			key = self.TYPE(BYTE.load(f))
+			key = BYTE.load(f)
 
 			# check for the terminal symbol
 			if key < 0:
 				break
+
+			val_type = self.TYPE(BYTE.load(f))
 
 			# load the value
 			metadata[key] = self.CODEC[val_type].load(f)
