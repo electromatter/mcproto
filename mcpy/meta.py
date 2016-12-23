@@ -47,9 +47,7 @@ import enum
 import io
 
 from .primitive import BOOL, BYTE, VARINT, FLOAT, STRING, CHAT, SLOT, POSITION, BLOCKTYPE, \
-		       Direction, Position, BlockType, BaseCodec
-
-from .nbt	import SLOT
+		       Direction, Position, BlockType
 
 __all__ = ['Type', 'Rotation', 'MetadataCodec', 'load', 'dump', 'loads', 'dumps']
 
@@ -70,7 +68,23 @@ class Type(enum.IntEnum):
 
 Rotation = collections.namedtuple('Rotation', 'rx ry rz')
 
-class MetadataCodec(BaseCodec):
+class MetadataCodec:
+	def __init__(self, schema=None, strict=True):
+		self.strict = strict
+		self.schema = schema or dict()
+
+	def dumps(self, obj):
+		'dumps obj as metadata and returns the resulting string'
+
+		f = io.BytesIO()
+		return bytes(f.getbuffer())
+
+	def loads(self, s):
+		'loads metadata from the bytes object s'
+
+		f = io.BytesIO(s)
+		return self.load(f)
+
 	def load_value(self, f, val_type):
 		'loads a value of type val_type from the file f and returns it or raises an error'
 
@@ -113,9 +127,12 @@ class MetadataCodec(BaseCodec):
 		'called to convert the resulting dict into a user value'
 		return schema
 
-	def load(self, f, schema=None, strict=True, schema_readonly=True):
+	def load(self, f, strict=None):
 		'loads metadata from '
 		metadata = {}
+
+		if strict is None:
+			strict = self.strict
 
 		while True:
 			key = BYTE.load(f)
@@ -128,20 +145,16 @@ class MetadataCodec(BaseCodec):
 			val_type = BYTE.load(f)
 
 			# try to find the expected type in our schema
-			if schema is not None:
-				expceted_type = schema.get(key, None)
-				if strict and expected_type is None:
-					raise ValueError('unknown key %r' % key)
+			expceted_type = self.schema.get(key, None)
+			if strict and expected_type is None:
+				raise ValueError('unknown key %r' % key)
 
-				# type check
-				if expceted_type is not None and val_type != expected_type:
-					raise ValueError('expected %r for key %r' % expected_type, key)
+			# type check
+			if expceted_type is not None and val_type != expected_type:
+				raise ValueError('expected %r for key %r' % expected_type, key)
 
 			# load the value
 			metadata[key] = self.load_value(f, val_type)
-
-			if not schema_readonly:
-				schema[key] = val_type
 
 		return self.load_hook(metadata)
 
@@ -184,20 +197,20 @@ class MetadataCodec(BaseCodec):
 		else:
 			raise ValueError('invalid type %r' % val_type)
 
-	def dump_hook(self, obj, schema):
+	def dump_hook(self, obj):
 		'returns an iterable that returns (key, type, value)'
 
 		for key in obj:
 			try:
-				val_type = schema[key]
+				val_type = self.schema[key]
 			except KeyError:
 				raise ValueError('unknown key %r' % key)
 
 			yield (key, val_type, obj[key])
 
-	def dump(self, f, obj, schema):
+	def dump(self, f, obj):
 		'dumps obj into f according to schema'
 
 		for key, val_type, value in obj.dump_hook(obj):
-			self.dump_value(f, val_type, val, schema)
+			self.dump_value(f, val_type, val)
 
