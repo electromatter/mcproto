@@ -86,9 +86,21 @@ class RotationCodec(StructCodec):
 
 ROTATION = RotationCodec()
 
+def iter_schema_errors(types, schema):
+	'yield (key, expected) for every schema error'
+	for key, val in types.items():
+		if key not in schema:
+			yield (key, None)
+		elif val != schema[key]:
+			yield (key, schema[key])
+
 def follows_schema(types, schema):
-	'used to validate schema after-the-fact '
-	return all(item in schema for item in types.items())
+	'used to validate schema after-the-fact'
+	try:
+		next(iter_schema_errors(types, schema))
+	except StopIteration:
+		return True
+	return False
 
 class MetadataCodec(BaseCodec):
 	TYPE = Type
