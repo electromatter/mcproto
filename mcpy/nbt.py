@@ -37,10 +37,10 @@ class NBTCodec(BaseCodec):
 		return obj
 
 	def load(self, f):
-		top, size = dict(), -1
+		top, top_types, size = dict(), -1
 		stack = [(top, size)]
 
-		while self.stack:
+		while stack:
 			# read key
 			if size < 0:
 				# we are in a compound, read the type and key

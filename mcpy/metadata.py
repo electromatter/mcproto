@@ -86,7 +86,12 @@ class RotationCodec(StructCodec):
 
 ROTATION = RotationCodec()
 
+def follows_schema(types, schema):
+	'used to validate schema after-the-fact '
+	return all(item in schema for item in types.items())
+
 class MetadataCodec(BaseCodec):
+	TYPE = Type
 	CODEC = {
 		Type.BYTE: BYTE,
 		Type.VARINT: VARINT,
@@ -105,60 +110,38 @@ class MetadataCodec(BaseCodec):
 
 	def load_value(self, f, val_type):
 		'loads a value of type val_type from the file f and returns it or raises an error'
-		if val_type not in self.CODEC:
-			raise ValueError('invalid type %r' % val_type)
-		return self.CODEC[val_type].load(f)
 
 	def load_hook(self, obj, types):
 		'called to convert the resulting dict into a user value'
 		return (obj, types)
 
-	def load(self, f, schema=None, strict=True):
+	def load(self, f):
 		'loads metadata from f see load_hook for return value'
 		metadata = {}
 		types = {}
 
 		while True:
-			key = BYTE.load(f)
+			key = self.TYPE(BYTE.load(f))
 
 			# check for the terminal symbol
 			if key < 0:
 				break
 
-			# read the value
-			val_type = Type(BYTE.load(f))
-
-			# try to find the expected type in our schema
-			if schema is not None:
-				if key in schema:
-					if val_type != schema[key]:
-						raise ValueError('expected %r for key %r' % expected_type, key)
-				else:
-					if strict:
-						raise ValueError('unknown key %r' % key)
-
 			# load the value
-			metadata[key] = self.load_value(f, val_type)
+			metadata[key] = self.CODEC[val_type].load(f)
 			types[key] = val_type
 
 		return self.load_hook(metadata, types)
-
-	def dump_value(self, f, val_type, val):
-		'dumps val into f according to val_type'
-		if val_type not in self.CODEC:
-			raise ValueError('invalid type %r' % val_type)
-		self.CODEC[val_type].dump(f, val)
 
 	def dump_hook(self, obj, schema):
 		'returns an iterable that returns (key, val_type, value)'
 		for key, val in obj.items():
 			yield key, schema[key], val
 
-	def dump(self, f, obj, schema):
+	def dump(self, f, obj, *args, **kwargs):
 		'dumps obj into f according to schema'
-
-		for key, val_type, value in self.dump_hook(obj, schema):
-			self.dump_value(f, val_type, val)
+		for key, val_type, value in self.dump_hook(obj, schema, *args, **kwargs):
+			self.CODEC[val_type].dump(f, val)
 
 METADATA = MetadataCodec()
 
