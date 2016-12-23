@@ -43,8 +43,8 @@ import uuid
 __all__ = ['Position', 'BlockType', 'BaseCodec', 'IntCodec', 'StructCodec',
 	   'SimpleStructCodec', 'FixedPointCodec', 'VarintCodec', 'AngleCodec',
 	   'PositionCodec', 'BlockTypeCodec', 'BytesCodec', 'StringCodec',
-	   'UUIDCodec', 'ArrayCodec', 'EnumCodec', 'IntEnumCodec',
-	   'Direction',
+	   'UUIDCodec', 'ArrayCodec', 'BoolOptionalCodec', 'EnumCodec',
+	   'IntEnumCodec', 'Direction',
 	   
 	   'BOOL', 'BYTE', 'UBYTE', 'SHORT', 'USHORT', 'INT', 'UINT', 'LONG', 'ULONG',
 	   'VARINT', 'VARLONG', 'FLOAT', 'DOUBLE', 'ANGLE', 'POSITION', 'BLOCKTYPE',
