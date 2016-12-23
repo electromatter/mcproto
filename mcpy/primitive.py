@@ -239,11 +239,51 @@ class BlockTypeCodec(BaseCodec):
 
 class BytesCodec(BaseCodec): 
 	def __init__(self, length=None):
-		pass
+		if length is None:
+			self.length = length
+		elif isinstance(length, int):
+			self.length = length
+		elif isinstance(length, IntCodec):
+			self.length = length
+		else:
+			raise TypeError('length must be None or an int or an IntCodec got %r' % length.__class__)
+
+	def load(self, f):
+		if self.length is None:
+			return f.read()
+
+		if isinstance(self.length, int):
+			length = self.length
+		else:
+			length = self.length.load(f)
+
+		val = f.read(length)
+		if len(val) != length:
+			raise EOFError
+
+		return val
+
+	def dump(self, f, val):
+		if isinstance(self.length, int):
+			if len(val) != self.length:
+				raise ValueError('expected %r bytes got %r' % (self.length, len(val)))
+		elif self.length is not None:
+			self.length.dump(f, len(val))
+		f.write(val)
 
 class StringCodec(BaseCodec):
-	def __init__(self, length=None, num_char=None, encoding='utf8'):
-		pass
+	def __init__(self, length=None, encoding='utf8'):
+		self.codec = BytesCodec(length)
+		self.encoding = encoding
+		''.encode(encoding)
+
+	def load(self, f):
+		return self.codec.load().decode(self.encoding)
+
+	def dump(self, f, val):
+		if not isinstance(val, str):
+			raise TypeError('expected str got %r' % val.__class__)
+		self.codec.dump(f, val.encode(self.encoding))
 
 class UUIDCodec(BaseCodec):
 	"""
