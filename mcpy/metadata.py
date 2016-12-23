@@ -46,8 +46,10 @@ import collections
 import enum
 import io
 
-from .primitive import BOOL, BYTE, VARINT, FLOAT, STRING, POSITION, BLOCKTYPE, \
-		       Direction, Position, BlockType, BaseCodec
+from .primitive import BOOL, BYTE, VARINT, FLOAT, STRING, \
+		       POSITION, BLOCKTYPE, DIRECTION, UUID,\
+		       Direction, Position, BlockType, \
+		       BaseCodec, StructCodec, BoolOptionalCodec
 
 from .chat	import CHAT
 
@@ -68,140 +70,95 @@ class Type(enum.IntEnum):
 	OPTIONAL_POSITION	= 9
 	DIRECTION		= 10
 	OPTIONAL_UUID		= 11
-	OPTIONAL_BLOCK_TYPE	= 12
+	OPTIONAL_BLOCKTYPE	= 12
 
 Rotation = collections.namedtuple('Rotation', 'rx ry rz')
 
+class RotationCodec(StructCodec):
+	def __init__(self):
+		super().__init__('>fff')
+
+	def load(self, f):
+		return Rotation(super().load(f))
+
+	def dump(self, f, val):
+		super().dump(f, (val.rx, val.ry, val.rz))
+
+ROTATION = RotationCodec()
+
 class MetadataCodec(BaseCodec):
+	CODEC = {
+		Type.BYTE: BYTE,
+		Type.VARINT: VARINT,
+		Type.FLOAT: FLOAT,
+		Type.STRING: STRING,
+		Type.CHAT: CHAT,
+		Type.SLOT: SLOT,
+		Type.BOOL: BOOL,
+		Type.ROTATION: ROTATION,
+		Type.POSITION: POSITION,
+		Type.OPTIONAL_POSITION: BoolOptionalCodec(POSITION),
+		Type.DIRECTION: DIRECTION,
+		Type.OPTIONAL_UUID: BoolOptionalCodec(UUID),
+		Type.OPTIONAL_BLOCKTYPE: BoolOptionalCodec(BLOCKTYPE)
+		}
+
 	def load_value(self, f, val_type):
 		'loads a value of type val_type from the file f and returns it or raises an error'
-
-		if val_type == Type.BYTE:
-			return BYTE.load(f)
-		elif val_type == Type.VARINT:
-			return VARINT.load(f)
-		elif val_type == Type.FLOAT:
-			return FLOAT.load(f)
-		elif val_type == Type.STRING:
-			return STRING.load(f)
-		elif val_type == Type.CHAT:
-			return CHAT.load(f)
-		elif val_type == Type.SLOT:
-			return SLOT.load(f)
-		elif val_type == Type.BOOL:
-			return BOOL.load(f)
-		elif val_type == Type.ROTATION:
-			return Rotation(FLOAT.load(f),
-					FLOAT.load(f),
-					FLOAT.load(f))
-		elif val_type == Type.OPTIONAL_POSITION:
-			if not BOOL.load(f):
-				return None
-			else:
-				return POSITION.load(f)
-		elif val_type == Type.DIRECTION:
-			return Direction(BYTE.load(f))
-		elif val_type == Type.OPTIONAL_UUID:
-			if not BOOL.load(f):
-				return None
-			else:
-				return UUID.load(f)
-		elif val_type == Type.OPTIONAL_BLOCK_TYPE:
-			return BLOCKTYPE.load(f)
-		else:
+		if val_type not in self.CODEC:
 			raise ValueError('invalid type %r' % val_type)
+		return self.CODEC[val_type].load(f)
 
-	def load_hook(self, obj, schema):
+	def load_hook(self, obj, types):
 		'called to convert the resulting dict into a user value'
-		return schema
+		return (obj, types)
 
-	def load(self, f, schema=None, strict=True, schema_readonly=True):
-		'loads metadata from '
+	def load(self, f, schema=None, strict=True):
+		'loads metadata from f see load_hook for return value'
 		metadata = {}
+		types = {}
 
 		while True:
 			key = BYTE.load(f)
 
 			# check for the terminal symbol
-			if key == 0xff:
+			if key < 0:
 				break
 
 			# read the value
-			val_type = BYTE.load(f)
+			val_type = Type(BYTE.load(f))
 
 			# try to find the expected type in our schema
 			if schema is not None:
-				expceted_type = schema.get(key, None)
-				if strict and expected_type is None:
-					raise ValueError('unknown key %r' % key)
-
-				# type check
-				if expceted_type is not None and val_type != expected_type:
-					raise ValueError('expected %r for key %r' % expected_type, key)
+				if key in schema:
+					if val_type != schema[key]:
+						raise ValueError('expected %r for key %r' % expected_type, key)
+				else:
+					if strict:
+						raise ValueError('unknown key %r' % key)
 
 			# load the value
 			metadata[key] = self.load_value(f, val_type)
+			types[key] = val_type
 
-			if not schema_readonly:
-				schema[key] = val_type
-
-		return self.load_hook(metadata)
+		return self.load_hook(metadata, types)
 
 	def dump_value(self, f, val_type, val):
 		'dumps val into f according to val_type'
-
-		if val_type == Type.BYTE:
-			BYTE.dump(f, val)
-		elif val_type == Type.VARINT:
-			VARINT.dump(f, val)
-		elif val_type == Type.FLOAT:
-			FLOAT.dump(f, val)
-		elif val_type == Type.STRING:
-			STRING.dump(f, val)
-		elif val_type == Type.CHAT:
-			CHAT.dump(f, val)
-		elif val_type == Type.SLOT:
-			SLOT.dump(f, val)
-		elif val_type == Type.BOOL:
-			BOOL.dump(f, val)
-		elif val_type == Type.ROTATION:
-			FLOAT.dump(f, val.rx)
-			FLOAT.dump(f, val.ry)
-			FLOAT.dump(f, val.rz)
-		elif val_type == Type.OPTIONAL_POSITION:
-			BOOL.dump(f, val)
-			if val:
-				return POSITION.dump(f)
-		elif val_type == Type.DIRECTION:
-			BYTE.dump(Direction(val))
-		elif val_type == Type.OPTIONAL_UUID:
-			BOOL.dump(f, val)
-			if val:
-				return UUID.dump(f)
-		elif val_type == Type.OPTIONAL_BLOCK_TYPE:
-			if not val:
-				VARINT.dump(0)
-			val = (val.blockid << 4) | (val.meta & 0x0f)
-			VARINT.dump(val)
-		else:
+		if val_type not in self.CODEC:
 			raise ValueError('invalid type %r' % val_type)
+		self.CODEC[val_type].dump(f, val)
 
 	def dump_hook(self, obj, schema):
-		'returns an iterable that returns (key, type, value)'
-
-		for key in obj:
-			try:
-				val_type = schema[key]
-			except KeyError:
-				raise ValueError('unknown key %r' % key)
-
-			yield (key, val_type, obj[key])
+		'returns an iterable that returns (key, val_type, value)'
+		for key, val in obj.items():
+			yield key, schema[key], val
 
 	def dump(self, f, obj, schema):
 		'dumps obj into f according to schema'
 
-		for key, val_type, value in obj.dump_hook(obj):
-			self.dump_value(f, val_type, val, schema)
+		for key, val_type, value in self.dump_hook(obj, schema):
+			self.dump_value(f, val_type, val)
 
 METADATA = MetadataCodec()
 

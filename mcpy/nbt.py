@@ -1,7 +1,8 @@
 import collections
 import enum
 
-from .primitive import BaseCodec, SHORT, BYTE
+from .primitive import BaseCodec, BytesCodec, StringCodec, ArrayCodec, \
+		       BOOL, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE
 
 __all__ = ['NBTCodec', 'SlotCodec', 'Slot', 'NBT', 'SLOT']
 
@@ -29,7 +30,7 @@ class NBTCodec(BaseCodec):
 		Type.DOUBLE: DOUBLE,
 		Type.BYTES: BytesCodec(length=INT),
 		Type.STRING: StringCodec(length=SHORT),
-		Type.INTARRAY: ArrayCodec(length=INT, elem=INT)
+		Type.INT_ARRAY: ArrayCodec(length=INT, elem=INT)
 		}
 
 	def load_hook(self, obj):
@@ -66,6 +67,7 @@ class NBTCodec(BaseCodec):
 
 			# save top incase it gets modified by compound or list
 			parent = top
+			val_type = tag
 
 			# read value
 			if tag == Type.COMPOUND:
@@ -76,9 +78,10 @@ class NBTCodec(BaseCodec):
 			elif tag == Type.LIST:
 				# enter list context
 				stack.append((top, size))
-				top = val = []
 				tag = Type(BYTE.load(f))
 				size = INT.load(f)
+				top = []
+				val = (tag, top)
 				if size < 0:
 					raise ValueError('invalid nbt: negitive list size?')
 			elif tag in self.CODEC:
@@ -89,7 +92,7 @@ class NBTCodec(BaseCodec):
 			# insert value into parent
 			if size < 0:
 				# we are in a compound
-				parent[key] = val
+				parent[key] = (val_type, val)
 			else:
 				# we are in a list so append
 				parent.append(val)
@@ -101,7 +104,15 @@ class NBTCodec(BaseCodec):
 		# we reached the end of the nbt data
 		return self.load_hook(top)
 
-	def dump(self, f, val, schema):
+	def dump_hook(self, val):
+		'returns an iterable that yields (key, (val_type, val))'
+		return val.items()
+
+	def dump(self, f, val, detect_cycles=False):
+		stack = []
+
+		while True:
+			iter(self.dump_hook(val))
 		pass
 
 NBT = NBTCodec()

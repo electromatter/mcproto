@@ -54,13 +54,13 @@ Position = collections.namedtuple('Position', 'x y z')
 BlockType = collections.namedtuple('BlockType', 'blockid meta')
 
 class BaseCodec:
-	def loads(self, s):
+	def loads(self, s, *args, **kwargs):
 		f = io.BytesIO(s)
-		return self.load(f)
+		return self.load(f, *args, **kwargs)
 
-	def dumps(self, val):
+	def dumps(self, *args, **kwargs):
 		f = io.BytesIO()
-		self.dump(f, val)
+		self.dump(f, *args, **kwargs)
 		return bytes(f.getbuffer())
 
 	def load(self, f):
@@ -403,6 +403,22 @@ class ArrayCodec(BaseCodec):
 		# write out the elements
 		for item in val:
 			self.elem.dump(f, item)
+
+class BoolOptionalCodec(BaseCodec):
+	def __init__(self, codec, none=None):
+		self.codec = codec
+		self.none = none
+
+	def load(self, f):
+		if BOOL.load(f):
+			return self.codec.load(f)
+		else:
+			return self.none
+
+	def dump(self, f, val):
+		BOOL.dump(val is not self.none)
+		if val is not self.none:
+			self.codec.dump(val)
 
 class EnumCodec(BaseCodec):
 	def __init__(self, enum, codec):
